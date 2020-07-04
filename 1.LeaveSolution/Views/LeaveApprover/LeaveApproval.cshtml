@@ -1,0 +1,445 @@
+﻿@model BlueCollaredLeaveSolution.Models.LeaveApprovalModelViewModel;
+@{
+    ViewData["Title"] = "LeaveApproval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/lib/bootstrap/dist/css/LeaveAppWIth.css" rel="stylesheet" />
+<style>
+    #tableleaveApproval {
+        border-bottom: 1px solid #dee2e6;
+    }
+</style>
+
+@section Scripts{
+    <script src="~/JQTable/jquery.dataTables.min.js"></script>
+    <link href="~/JQTable/jquery-ui.css" rel="stylesheet" />
+    <link href="~/JQTable/dataTables.jqueryui.min.css" rel="stylesheet" />
+    <link href="~/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+}
+<script type="text/javascript">
+
+        var __filename = '';
+        var empid = '';
+        var leavecategory = '';
+        var Fromdate = '';
+        var Todate = ''
+        var Totalleave = '';
+        var EmployeeName = '';
+
+    $(document).ready(function () {
+        $(document).on('click', '#tableleaveApproval tr', function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            }
+            else {
+                var table = $('#tableleaveApproval').DataTable();
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        });
+
+        $(document).on('click', '#TableApprover tr', function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            }
+            else {
+                var table = $('#TableApprover').DataTable();
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        });
+        var employeeID = "";
+        var leaverequestid = "";
+           //for alternate approvermodal
+        $(".clickhere").on('click', function () {
+            $(this).closest("tr").toggleClass('selected');
+            $("#loader").show();
+            var url = '@Url.Content("~/")' + "LeaveApprover/GetApproverList";
+            var table = $('#tableleaveApproval').DataTable();
+            var rows = table.rows('.selected').data();
+
+
+            for (var i = 0; i < rows.length; i++) {
+                //console.log(table.rows('.selected').data()[i].attributeNameFromYourself);
+                employeeID = rows[i][3];
+                leaverequestid = rows[i][1];
+            }
+            $.getJSON(url, { employeeID: employeeID, leaverequestid: leaverequestid }, function (data) {
+                $("#loader").hide();
+                if (data.length != 0) {
+
+                    $("#Alternateapprover").modal("show");
+                    var my_columns = [];
+                    var my_item = {};
+                    my_item.data = 'approverId';
+                    my_item.title = 'Approver Id';
+                    my_columns.push(my_item);
+                    var my_item = {};
+                    my_item.data = 'approverName';
+                    my_item.title = 'Approver Name';
+                    my_columns.push(my_item);
+                    var my_item = {};
+                    my_item.data = 'approverMobNo';
+                    my_item.title = 'Approver MobNo';
+                    my_columns.push(my_item);
+                    var my_item = {};
+                    my_item.data = 'approverMailID';
+                    my_item.title = 'Approver MailID';
+                    my_columns.push(my_item);
+                    var my_item = {};
+                    my_item.data = 'hodid';
+                    my_item.title = 'HODID';
+                    my_columns.push(my_item);
+                    var my_item = {};
+                    my_item.data = 'hodName';
+                    my_item.title = 'HODName';
+                    my_columns.push(my_item);
+
+                    var my_item = {};
+                    my_item.data = 'hodMailID';
+                    my_item.title = 'HODMailID';
+                    my_columns.push(my_item);
+                    $('#TableApprover').DataTable({
+                        data: data.data, "destroy": true,
+                        "columns": my_columns,
+                        "ordering": false,
+                        "lengthMenu": [[3, 6, 9], [3, 6, 9]],
+                        'columnDefs': [
+                            //hide the second & fourth column
+                            { 'visible': false, 'targets': [2, 3, 4, 5, 6] }
+                        ]
+                    });
+
+                }
+            });
+        });
+
+        $('#btnSaveApprover').on('click', function () {
+            $("#ApproveRequest").modal('hide');
+            $("#approverId").removeAttr("readonly", false);
+            var table = $('#TableApprover').DataTable();
+            var rows = table.rows('.selected').data();
+            var url = '@Url.Content("~/")' + "LeaveApprover/SaveAlternateApprover";
+            if (rows.length > 0) {
+                var model = {
+                    ApproverID: rows[0]["approverId"],
+                    ApproverName: rows[0]["approverName"],
+                    ApproverMobNo: rows[0]["approverMobNo"],
+                    ApproverMailID: rows[0]["approverMailID"],
+                    HODID: rows[0]["hodid"],
+                    HODName: rows[0]["hodName"],
+                    HODMailID: rows[0]["hodMailID"],
+                    EmployeeID: employeeID,
+                    LeaveRequestID: leaverequestid,
+                };
+                type = 'Post';
+                data = model;
+                $.post(url, { model: model }, function (data) {
+                    // alert(data.msg);
+                    if (data.msg == "saved") {
+                        alert("Approver Updated");
+                    }
+                    else {
+                        alert("Error occured while approver updating");
+                    }
+                    window.location.reload();
+                });
+            }
+        });
+
+        $("#loader").show();
+        $('#tableleaveApproval').on('page.dt', function () {
+            $('#tableleaveApproval tr input').prop("checked", false);
+        });
+
+        $('#tableleaveApproval').on('length.dt', function (e, settings, len) {
+            $('#tableleaveApproval tr input').prop("checked", false);         
+        });
+
+        $("#tableleaveApproval").DataTable({
+            "processing": true, // for show progress bar
+            "filter": true, // this is for disable filter (search box)
+            "orderMulti": false, // for disable multiple column at once
+         //   "order": [[2, "desc"]],
+            "columnDefs": [
+                {
+                    "targets": [0],
+                    "orderable": false,
+                    "searchable": false
+                },
+                {
+                    "targets": [1],
+                    "visible": false,
+                    "searchable": false
+                },                
+                {
+                    "targets": [2],
+                    "visible": false
+                }
+            ]
+        });
+        function chkselect(){
+            var checked = $("#tableleaveApproval input:checked").length > 0;
+            if (!checked) {
+                alert("Please Select LeaveRequest");
+
+                return false;
+
+            }
+            else {
+                return true;
+            }
+        };
+
+        function Submitstatus(status) {
+            $("#loader").show();
+            var url = '@Url.Content("~/")' + "LeaveApprover/LeaveApproval";
+
+            var selected = [];
+            var table = $("#tableleaveApproval tbody tr td input:checked")
+            $.each(table, function (index, value) {
+                if ($(this).attr('key') != undefined) {
+                    selected.push($(this).attr('key'));
+                }
+            })
+            
+            $("#ApproveRequest").modal('hide');
+
+            $("#RejectRequest").modal('hide');
+            var form = $('#__AjaxAntiForgeryForm');
+            var token = $('input[name="__RequestVerificationToken"]', form).val();
+            var LeaveReuestID = selected.join(",");
+            $.post(url, { __RequestVerificationToken: token,  LeaveRequestID: LeaveReuestID, status: status }, function (data) {
+                $("#loader").hide();
+                if (data != null) {
+                    alert(data.msg);
+                    window.location.reload(1);
+                    return false;
+                }
+                else {
+
+                }
+                $("#loader").hide();
+            }).fail(function (msg,error) {
+                $("#loader").hide();
+                alert("error in request..!!");
+            });
+        };
+
+        $("#Approvalcalmodal").click(function () {
+            if (chkselect()) {
+                $("#ApproveRequest").modal('show');
+            }
+            else {
+
+                $("#ApproveRequest").modal('hide');
+            };
+
+
+        });
+        $("#Rejectcalmodal").click(function () {
+            if (chkselect()) {
+                $("#RejectRequest").modal('show');
+            }
+            else {
+
+                $("#RejectRequest").modal('hide');
+            };
+
+        });
+
+        //$(document).on("#Reject", "click", function () {
+        //    Submitstatus("Reject");
+        //});
+        $("#Approval").click(function () {
+            Submitstatus("Approved");
+
+        });
+        $("#Reject").click(function () {
+            Submitstatus("Rejected");
+
+        });
+        var __filename = '';
+            $('#selectall').on('click', function () {
+                var checked = $(this).is(':checked');
+            var table = $('#tableleaveApproval').DataTable();
+            $('#tableleaveApproval tr input').prop("checked", checked);
+
+            //table.rows().every(function (index, element) {
+            //    var row = $(this.node());
+            //    var statusElement = row.find('td input[type=checkbox]');
+            //        $(statusElement).prop('checked', checked);
+            //});
+            });
+
+            if (__filename != null) {
+            }
+
+            $("#File").text(__filename);
+        $("#Download").click(function () {
+
+                var url = '@Url.Content("~/")' + "LeaveApprover/DownloadAttachment";
+                __filename = "FileUpload/".concat(__filename);
+                window.location.href = url + "?Download=" + __filename;
+            });
+            $("#loader").hide();
+        });
+
+</script>
+@*$.each(@Model.leaveApprovals, function (index, value) {
+        $('#LeaveRequestDetailsofEmployee').text(modelleave.EmployeeID)
+        alert("hello");
+    });*@
+
+<section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-primary BorderBottom-blue">
+                <div class="box-header">
+                    <h3 class="box-title" data-trn-key="leaverequestapproval">
+                        Leave Request Approval
+                    </h3>
+                </div>
+                <form id = "__AjaxAntiForgeryForm">
+                    @Html.AntiForgeryToken()
+                </form>
+                <!-- /.box-header -->
+                <div class="box-body table-responsive">
+                    <table id="tableleaveApproval" class="table table-hover">
+                        <thead>
+                            <tr>                              
+                                <th>
+                                    <label><input type="checkbox" name="selectall" class="form-check" id="selectall"> Select All</label>
+                                </th>
+                                <th hidden>LeaveRequestID</th>
+                                <th hidden>AppliedDate</th>
+                                <th>EmployeeID</th>
+                                <th>EmployeeName</th>
+                                <th>LeaveType</th>
+                                <th>FromDate</th>
+                                <th>ToDate</th>
+                                <th>Status</th>
+                                <th>TotalLeaves</th>
+                                <th>Change Approver</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.leaveApprovals.Count; i++)
+                            {
+                                <tr>
+                                    <td> <input type="checkbox" style="height:18px; width:18px" key="@Model.leaveApprovals[i].LeaveRequestId" class="form-check" id="select_@i" /></td>
+                                    <td id="LeaveRequestID_@i" class="clsleavereq" hidden>@Model.leaveApprovals[i].LeaveRequestId</td>
+                                    <td hidden>@Model.leaveApprovals[i].LeaveAppliedDate</td>
+                                    <td>@Model.leaveApprovals[i].EmployeeID</td>
+                                    <td>@Model.leaveApprovals[i].EmployeeName</td>
+                                    <td>@Model.leaveApprovals[i].LeaveCategory</td>
+                                    <td>@Model.leaveApprovals[i].FromDateString</td>
+                                    <td>@Model.leaveApprovals[i].ToDateString</td>
+                                    <td>@Model.leaveApprovals[i].Status</td>
+                                    @if (@Model.leaveApprovals[i].LeaveShift == "F")
+                                    {
+                                        <td>@Model.leaveApprovals[i].TotalLeaves (First Half)</td>
+                                    }
+                                    else if (@Model.leaveApprovals[i].LeaveShift == "S")
+                                    {
+                                        <td>@Model.leaveApprovals[i].TotalLeaves (Second Half)</td>
+                                    }
+                                    else
+                                    {
+                                        <td>@Model.leaveApprovals[i].TotalLeaves</td>
+                                    }
+                                    <td>
+                                        <button type="button" class="clickhere btn btn-success " data-trn-key="clickhere">Click Here</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div class="col-lg-12 text-center">
+                        <button type="button" id="Approvalcalmodal" class="btn btn-success " data-trn-key="approve">Approve</button>
+                        <button type="button" id="Rejectcalmodal" class="btn btn-danger " data-trn-key="reject">Reject</button>
+                    </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+
+            <!-- /.box -->
+        </div>
+    </div>
+
+    <div class="modal fade" id="ApproveRequest">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title " data-trn-key="approve" id="NUserModalLabel">Approve</h6>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="col-lg-12">
+                            Are you sure to Approve the selected leave request?
+                        </div>
+                    </div>
+                    <br />
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" id="Approval">Approve</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="RejectRequest">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title  " data-trn-key="reject" id="NUserModalLabel">Reject</h6>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="col-lg-12">
+                            Are you sure to Reject the selected leave request?
+                        </div>
+                    </div>
+                    <br />
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" id="Reject">Reject</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="Alternateapprover">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title trn" data-trn-key="pleaseEnterApproverID" id="NUserModalLabel">Please select Approver ID from the below list and Click on OK</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center" id="Centerbody">
+                        <section class="content">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="box box-primary BorderBottom-blue">
+                                        <div class="box-body table-responsive">
+                                            <table id="TableApprover" class="table table-hover" style="width:100%"></table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary trn" data-trn-key="btnok" data-dismiss="modal" data-toggle="modal" id="btnSaveApprover">Ok</button>
+                            <button type="button" class="btn btn-warning trn" data-trn-key="cancelbutton" data-dismiss="modal" data-toggle="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+

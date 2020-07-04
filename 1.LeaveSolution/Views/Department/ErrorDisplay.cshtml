@@ -1,0 +1,41 @@
+﻿@model BlueCollaredLeaveSolution.Models.DeptLeaveRequestErrorModel;
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+<h5>Department Leave Request</h5>
+
+<h6><span style="color:red" class="trn" data-trn-key="errorDisplay">Following Employees leave request can not be applied as EmployeeID  not found database </span> </h6>
+<div class="container">
+    <div class="table-responsive">
+        @if (Model != null && Model.DeptLeaveErrorList.Count > 0)
+        {
+            <div class="table-responsive">
+                <table id="InvoiceDetails" class="table table-striped table-bordered" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th class="class="trn" data-trn-key="employeeid">
+                                EmployeeID
+                            </th>
+                           
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var items in Model.DeptLeaveErrorList)
+                        {
+                            <tr>
+                                <td>@items.EmployeeID</td>
+                               
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <hr />
+       
+
+    </div>
+</div> 

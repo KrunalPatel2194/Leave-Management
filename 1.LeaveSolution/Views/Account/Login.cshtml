@@ -1,0 +1,437 @@
+﻿@model BlueCollaredLeaveSolution.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+}
+@section Scripts{
+    <meta charset="utf-8">
+    <link href="~/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <script src="~/js/jquery.inputmask.js"></script>
+    <script src="~/js/jquery.inputmask.date.extensions.js"></script>
+    <script src="~/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+}
+<script type="text/javascript" src="~/js/aes.js"></script>
+<style>
+    nav.nav.navbar-static-top {
+        padding: 15px;
+    }
+    label.trn {
+        color: #000;
+    }
+    .form-horizontal .has-feedback .form-control-feedback {
+        color: #ababab;
+    }
+    .content-wrapper {
+        background-repeat: no-repeat;
+        min-height: 684px;
+        background-image: url('../Images/background.jpg');
+        background-size: cover;
+    }
+    .box {
+        border-radius: 5px !important;
+        box-shadow: unset;
+    }
+    .box-header {
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+    .btn-danger {
+        background-color: #ff6666;
+        border-color: #ff6666;
+    }
+    .btn-success {
+        background-color: #33cc80;
+        border-color: #33cc80;
+    }
+    .btn {
+        padding: 5px 19px;
+        margin: 0px 5px;
+    }
+    .login-box-sec {
+        margin: 10% 32%;
+    }
+    .form-control {
+        border-color: #ddd;
+        border-radius: 4px;
+        background-color: white !important;
+    }
+    .link {
+        cursor: pointer;
+        color: #5f5fe2 !important;
+        font-weight: normal;
+        margin-top: 4px;
+    }
+    .input-group .form-control, .input-group-addon, .input-group-btn {
+        display: table-cell;
+    }
+</style>
+<script type="text/javascript">
+    $(document).ready(function () {
+        @*if ((window.fullScreen) ||
+            (window.innerWidth == screen.width && window.innerHeight == screen.height)) {
+            window.location.href = '@Url.Content("~/")' + "Account/LoginKIOSKHome";
+        }*@
+
+        var lang = localStorage.getItem("language");
+        if (lang != undefined) {
+            if (lang == "h") {
+                $("#rdbtnhindi").attr("checked", true);
+            }
+            else if (lang == "m") {
+                $("#rdbtnmarathi").attr("checked", true);
+            }
+            else if (lang == "k") {
+                $("#rdbtnkannad").attr("checked", true);
+            }
+            else if (lang == "g") {
+                $("#rdbtngujarati").attr("checked", true);
+            }
+            else if (lang == "b") {
+                $("#rdbtnbengali").attr("checked", true);
+            }
+            else {
+                $("#rdbtnenglish").attr("checked", true);
+            }
+        }
+        else {
+            $("#rdbtnenglish").attr("checked", true);
+        }
+
+        $("input[name=Login]").change(function () {
+            $("#loader").show();
+            var language = $('input[name=Login]:checked').val();
+            if (typeof (Storage) !== "undefined") {
+                localStorage.setItem("language", language);
+            } else {
+                if (lang == "h") {
+                    alert("क्षमा करें, आपका वेब ब्राउज़र सहारा का संचयन नहीं करता है ...");
+                }
+                else if (lang == "m") {
+                    alert("क्षमस्व, आपला वेब ब्राउझर संचयनास समर्थन देत नाही ..");
+                }
+                else if (lang == "k") {
+                    alert("ಕ್ಷಮಿಸಿ, ನಿಮ್ಮ ಬ್ರೌಸರ್ ವೆಬ್ ಸಂಗ್ರಹಣೆಯನ್ನು ಮಾಡುವುದಿಲ್ಲ ...");
+                }
+                else if (lang == "g") {
+                    alert("માફ કરશો, તમારું વેબ બ્રાઉઝર સ્ટોરેજ કરતું નથી..");
+                }
+                else if (lang == "b") {
+                    alert("দুঃখিত, আপনার ব্রাউজারটি ওয়েব স্টোরেজ করে না ...");
+                }
+                else {
+                    alert("Sorry, your browser does not support Web Storage...");
+                }
+                //alert("Sorry, your browser does not support Web Storage...");
+                return false;
+            }
+            window.location.reload(1);
+        });
+
+        $("#loader").show();
+        $('#EmployeeDOB').inputmask('dd-mm-yyyy', { 'placeholder': 'dd-mm-yyyy' })
+        $('#EmployeeDOB').datepicker({
+            format: 'dd-mm-yyyy',
+            autoclose: true
+        });        
+        $("#btnLoginSubmit").click(function () {
+            $("#UserId").val($.trim($("#UserId").val()));
+            $("#Password").val($.trim($("#Password").val()));
+            if ($.trim($("#UserId").val()) == "") {
+                if (lang == "h") {
+                    alert("कृप्या उपयोगकर्ता नाम दर्ज करे");
+                }
+                else if (lang == "m") {
+                    alert("कृपया वापरकर्ता नाव प्रविष्ट करा");
+                }
+                else if (lang == "k") {
+                    alert("ದಯವಿಟ್ಟು ಬಳಕೆದಾರ ಹೆಸರು ಪ್ರವೇಶಿಸು");
+                }
+                else if (lang == "g") {
+                    alert("મહેરબાની કરીને વપરાશકર્તા નામ દાખલ કરો");
+                }
+                else if (lang == "b") {
+                    alert("অনুগ্রহ ব্যবহারকারীর নাম প্রবেশ করান");
+                }
+                else {
+                    alert("Please enter user name");
+                }
+                ///alert("Please enter user name");
+                $("#UserId").focus();
+                return false
+            }
+            else if ($.trim($("#Password").val()) == "") {
+                if (lang == "h") {
+                    alert("कृप्या पासवर्ड दर्ज करे");
+                }
+                else if (lang == "m") {
+                    alert("कृपया संकेतशब्द प्रविष्ट करा");
+                }
+                else if (lang == "k") {
+                    alert("ದಯವಿಟ್ಟು ಸಂಜ್ಞೆ ಪ್ರವೇಶಿಸು");
+                }
+                else if (lang == "g") {
+                    alert("મહેરબાની કરીને પાસવર્ડ દાખલ કરો");
+                }
+                else if (lang == "b") {
+                    alert("অনুগ্রহ গুপ্তমন্ত্র প্রবেশ করান");
+                }
+                else {
+                    alert("Please enter password");
+                }
+                //alert("Please enter password");
+                $("#Password").focus();
+                return false;
+            }
+            var txtpassword = $('#Password').val();
+            var key = CryptoJS.enc.Utf8.parse('8080808080808080');
+            var iv = CryptoJS.enc.Utf8.parse('8080808080808080');
+
+            var encryptedpassword = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(txtpassword), key,
+
+                { keySize: 128 / 8, iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+
+            $('#Password').val(encryptedpassword);
+            $("#loader").show();
+        });
+        $("#lnkreset").click(function () {
+            var url = '@Url.Content("~/")' + "Account/GenerateOTPForReset";
+            var datafr = "Reset";
+            $("#fromdatahidden").val(datafr);
+            $.getJSON(url, { datafrom: datafr }, function (data) {
+                if (data == true) {
+                    $("#AskOTP").modal('show');
+                }
+                });
+        });
+
+        $("#lnknewuser").click(function () {
+            var url = '@Url.Content("~/")' + "Account/GenerateOTPForReset";
+            var datafr = "NewUser";
+            $("#fromdatahidden").val(datafr);
+            $.getJSON(url, { datafrom: datafr }, function (data) {
+                if (data == true) {
+                    $("#AskOTP").modal('show');
+                }
+                });
+        });
+
+        $('#UserId').tooltip({
+        });
+
+        $("#submitAssessment").click(function () {
+            $("#EmployeeID").val("");
+            $("#EnterOTP").val("");
+            $("#EmployeeDOB").val("");
+            $("#EmployeeID").focus();
+            $("#EnterOTPM").modal("show");
+        });
+
+        $("#Submitbuttonotp").click(function () {
+            $("#loader").show();
+            var url = '@Url.Content("~/")' + "Account/OtpMatch";
+            var empid = $.trim($('#EmployeeID').val());
+            var datafr = $("#fromdatahidden").val();
+            var dob = $('#EmployeeDOB').val();
+            var otp = $('#EnterOTP').val();
+            var key = CryptoJS.enc.Utf8.parse('8080808080808080');
+            var iv = CryptoJS.enc.Utf8.parse('8080808080808080');
+            var encryptedpassword = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(otp), key,
+
+                { keySize: 128 / 8, iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+            $("#hdnOTP").val(encryptedpassword);
+            var returnval = $("#hdnOTP").val();
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: { enteredotp: returnval, empid: empid, dob: dob, datafr: datafr },
+                dataType: "json",
+                success: function (data) {
+                    $("#EnterOTPM").modal("hide");
+                    $('#EmployeeDOB').val("");
+                    $('#EnterOTP').val("");
+                    $('#EmployeeID').val("");
+                    $("#hdnOTP").val("");
+
+                    if (data == 1) {
+                        window.location.href = 'NewUser';
+                        $("#EnterOTPM").modal("hide");
+                    }
+
+                    else if (data == 2) {
+                        window.location.href = 'GenerateOTP';
+                        $("#EnterOTPM").modal("hide");
+                    }
+                    else if (data == 0) {
+                        if (lang == "h") {
+                            alert("चेतावनी !, दर्ज किए गए क्रेडेंशियल दर्ज नहीं किए गए मैच की आवश्यकता है");
+                        }
+                        else if (lang == "m") {
+                            alert("चेतावणी !, प्रविष्ट केलेली क्रेडेन्शियल्स जुळली नाहीत");
+                        }
+                        else if (lang == "k") {
+                            alert("ಎಚ್ಚರಿಕೆ!, ಪ್ರವೇಶಿಸಿದ ರುಜುವಾತುಗಳು ಹೊಂದಿಕೆಯಾಗಲಿಲ್ಲ");
+                        }
+                        else if (lang == "g") {
+                            alert("ચેતવણી !, દાખલ કરેલ ઓળખપત્રો મેળ ખાતા નથી");
+                        }
+                        else if (lang == "b") {
+                            alert("সতর্কতা !, প্রবেশ করা শংসাপত্রগুলি মেলে না");
+                        }
+                        else {
+                            alert("Warning!, Entered Credentials Did Not Match");
+                        }
+                        //alert("Warning!, Entered Credentials Did Not Match");
+                    }
+                    else if (data == 4) {
+                        if (lang == "h") {
+                            alert("उपयोगकर्ता पहले से मौजूद है !!! यदि आप पासवर्ड भूल गए तो पासवर्ड बदलो/रिसेट ");
+                        }
+                        else if (lang == "m") {
+                            alert("वापरकर्ता आधीच अस्तित्वात आहे !!! जर आपण संकेतशब्द विसरला असेल तर विसरलात पासवर्ड/ रीसेट करा संकेतशब्द क्लिक करा");
+                        }
+                        else if (lang == "k") {
+                            alert("ಬಳಕೆದಾರರು ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿದ್ದಾರೆ !!! ನೀವು ಪಾಸ್‌ವರ್ಡ್ ಮರೆತಿದ್ದರೆ ಮರೆತುಹೋದ / ಮರುಹೊಂದಿಸುವ ಪಾಸ್‌ವರ್ಡ್ ಕ್ಲಿಕ್ ಮಾಡಿ");
+                        }
+                        else if (lang == "g") {
+                            alert("વપરાશકર્તા પહેલેથી જ અસ્તિત્વમાં છે !!! જો તમે પાસવર્ડ ભૂલી ગયા છો તો પાસવર્ડ બદલો /રીસેટ કરો પર ક્લિક કરો");
+                        }
+                        else if (lang == "b") {
+                            alert("ব্যবহারকারী ইতিমধ্যে বিদ্যমান !!! আপনি পাসওয়ার্ড ভুলে গেলে ভুলে যাওয়া/পুনরায় সেট করা পাসওয়ার্ডটিতে ক্লিক করুন");
+                        }
+                        else {
+                            alert("User already Exist!!!If you forgot password click on forgot/reset password");
+                        }
+                        window.location.href = 'Login';
+                    }
+                    $("#loader").hide();
+                }
+            });            
+        });
+        $("#loader").hide();
+    });   
+
+    function generateotponNo() {
+        var param = $("#fromdatahidden").val();
+        var url = '@Url.Action("GenerateOTPLayer", "Account", new { datafrom = "__param__" })';
+        window.location.href = url.replace('__param__', encodeURIComponent(param));
+    }
+</script>
+
+<section class="content">
+    <div class="col-lg-4"></div>
+    <div class="col-lg-4">
+        @Html.HiddenFor(item => Model.UserName)        
+        <div class="login-box-body">
+            <div class="login-logo">
+                <img src="~/Images/TATA Motors Connecting Aspirations Biru_new.jpg">
+            </div>
+            <hr />
+            <h4 style="text-align:center">
+                Enter Login Credential
+            </h4>
+            <form asp-action="Login" method="post" class="form-horizontal">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" id="hdnOTP" value="" />
+                <div class="box-body">
+                    <div class="form-group has-feedback">
+                        <label for="language" class="control-label trn" data-trn-key="selectlanguage">Select Language</label>
+                        <br />
+                        <label class="radio-inline"><input type="radio" value="e" id="rdbtnenglish" name="Login" checked>English</label>
+                        <label class="radio-inline"><input type="radio" value="h" id="rdbtnhindi" name="Login">हिंदी</label>
+                        <label class="radio-inline"><input type="radio" value="m" id="rdbtnmarathi" name="Login">मराठी</label>
+                        <label class="radio-inline"><input type="radio" value="k" id="rdbtnkannad" name="Login">ಕನ್ನಡ</label>
+                        <label class="radio-inline"><input type="radio" value="g" id="rdbtngujarati" name="Login">ગુજરાતી</label>
+                        <label class="radio-inline"><input type="radio" value="b" id="rdbtnbengali" name="Login">বাঙালি</label>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <label for="language" class="control-label trn" data-trn-key="userid">User ID:</label>
+                        <input asp-for="UserId" autocomplete="off" autofocus title="e.g. 123456" class="form-control" new { placeholder="e.g. 123456" } />
+                        <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+                        <span asp-validation-for="UserId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <label for="language" class="control-label trn" data-trn-key="password">Password:</label>
+                        <input asp-for="Password" autocomplete="off" class="form-control" data-toggle="password" type="password" new { placeholder="Password" } />
+                        @* <a asp-controller="Account" asp-action="GenerateOTPForReset"><label class=" link" data-trn-key="forgotpwd"></label> </a>*@
+                        <a id="lnkreset"><label class=" link" data-trn-key="resetpwd">Forgot Password/Reset Password</label></a>
+                        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                </div>
+                <div class="box-footer no-border" style="text-align:center;">
+                    <button type="button" id="lnknewuser" href="#NewUser" class="btn btn-primary "> <i class="fa fa-plus" aria-hidden="true"> </i>&nbsp;<span data-trn-key="newuser" class="trn"> New User</span> </button>
+                    <button type="submit" name="btnLoginSubmit" value="WOKIOSK" class="btn btn-success" id="btnLoginSubmit">  <i class="fa fa-sign-in" aria-hidden="true">  </i>&nbsp;<span data-trn-key="loginbutton" class="trn"> Login</span>  </button>
+                    <button type="button" class="btn btn-danger" onclick="window.location.href='@Url.Action("LoginHome", "Account")'"> <i class="fa fa-close" aria-hidden="true"> </i>&nbsp; <span class="trn" data-trn-key="cancelbutton">Cancel</span> </button>
+                </div>
+            </form>
+            <input type="hidden" id="fromdatahidden" />
+        </div>
+    </div>
+    <div class="col-lg-4"></div>
+
+</section>
+
+@*  modal for new user*@
+<div class="modal fade" id="AskOTP">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title trn" data-trn-key="newuser" id="NUserModalLabel">New User</h4>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body">
+                    <label class="trn" data-trn-key="doyouhaveotp">Do you have OTP?</label>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary trn" data-trn-key="yes" data-dismiss="modal" id="submitAssessment">Yes</button>
+                    <button type="button" class="btn btn-default trn" data-trn-key="no" onclick="generateotponNo();">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*modal for enter otp*@
+<div class="modal fade" id="EnterOTPM">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title trn" data-trn-key="enterotp">Enter OTP</h5>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <div class="form-group row">
+                        <div class="col-form-label col-sm-3">
+                            <label asp-for="EmployeeID" class="trn" data-trn-key="employeeid"></label>
+                        </div>
+                        <div class="col-sm-8">
+                            <input asp-for="EmployeeID" autocomplete="off" class="form-control" new { placeholder="EmployeeID" } />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-form-label col-sm-3">
+                            <label asp-for="EnterOTP" class="trn" data-trn-key="enterotp"></label>
+                        </div>
+                        <div class="col-sm-8">
+                            <input asp-for="EnterOTP" type="password" autocomplete="off" class="form-control" new { placeholder="Enter OTP" } />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-form-label col-sm-3">
+                            <label asp-for="EmployeeDOB" class="trn" data-trn-key="employeeDOB"></label>
+                        </div>
+                        <div class="col-sm-8">
+                            <input asp-for="EmployeeDOB" autocomplete="off" class="form-control" new { placeholder="dd-mm-yyyy" } />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" id="Submitbuttonotp" class="btn btn-primary trn" data-trn-key="btnSave">Save</button>
+                <button type="button" class="btn btn-warning trn" data-dismiss="modal" data-trn-key="btnClose">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

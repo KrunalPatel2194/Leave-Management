@@ -1,0 +1,21 @@
+﻿<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $(".alert-dismissible").fadeTo(4000, 500).slideUp(500, function () {
+            $(".alert-dismissible").alert('close');
+        });
+    });
+</script>
+
+@if (ViewBag.Messages != null)
+{
+    @foreach (var msg in ViewBag.Messages)
+    {
+        <div class="alert alert-@msg.AlertType alert-dismissible" id="successModal">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <p style="font-size:large">@msg.AlertTitle @msg.AlertMessage</p>
+        </div>
+    }
+}
+

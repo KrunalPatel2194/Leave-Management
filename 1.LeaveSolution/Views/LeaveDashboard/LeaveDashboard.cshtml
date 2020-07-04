@@ -1,0 +1,275 @@
+﻿@model BlueCollaredLeaveSolution.Models.LeaveQuotaModelViewModel
+@using Microsoft.AspNetCore.Http;
+@using BlueCollaredLeaveSolution.Core;
+@using Newtonsoft.Json;
+@using NonFactors.Mvc.Grid
+@{
+    ViewData["Title"] = "LeaveDashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Scripts{
+    <meta charset="utf-8">
+    <link href="~/css/bootstrap-datepicker.min.css" rel="stylesheet" />  
+    <script src="~/js/jquery.dataTables.min.js"></script>
+    <link href="~/JQTable/jquery-ui.css" rel="stylesheet" />
+    <link href="~/JQTable/dataTables.jqueryui.min.css" rel="stylesheet" />
+    <script src="~/js/bootstrap-datepicker.min.js"></script>
+    <script src="~/js/jquery.knob.min.js"></script>
+}
+<style>
+    .Pending {
+        background-color: #f39c12 !important;
+    }
+    .Approved {
+        background-color: #33cc80 !important;
+    }
+    .Rejected, .Withdrawal,.Error {
+        background-color: #ff0000 !important;
+    }
+
+    .box-header  {
+        color: #777874;
+        background-color: white
+    }
+    #dashboardTable {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    td.day {
+        position: relative;
+    }
+
+        td.day i.fa.fa-fw.fa-circle {
+            font-size: 6px;
+            position: absolute;
+            top: 6px;
+            right: 20px;
+        }
+
+        td.day.PresentDay i.fa.fa-fw.fa-circle {
+            color: #f39c12 !important
+        }
+
+        td.day.AbsentDay i.fa.fa-fw.fa-circle {
+            color: #33cc80;
+        }
+
+        td.day.RejectedDay i.fa.fa-fw.fa-circle, td.day.WithdrawDay i.fa.fa-fw.fa-circle {
+            color: red;
+        }
+
+    .datepicker {
+        padding: 15px;
+    }
+</style>
+
+<script>
+
+    function dateChanged(ev) {
+        $("#attendance-calendar table").addClass('table-bordered');
+        $(".PresentDay").append("<i class='fa fa-fw fa-circle'></i>");
+        $(".PresentDay").attr('title', 'Privilege Leave');
+        $("#attendance-calendar .AbsentDay").append("<i class='fa fa-fw fa-circle'></i>");
+    }
+
+    function getleavehistory() {
+        var url = '@Url.Content("~/")' + "LeaveDashboard/LeaveHistoryData";
+        $.getJSON(url, {}, function (data) {
+            var html = "";
+            var res = data.result;
+            $.each(res, function (index, val) {
+                if (index < 5) {
+                    html += "<tr> <td>" + val.fromDate + "</td> <td><span class='label " + val.status + "'>" + val.status + "</span></td> <td>" + val.leaveCategory + "</td>";
+                }
+                if (val.status == "Pending") {
+                    pending_dates.push(val.fromDate);
+                }
+                else if (val.status == "Approved") {
+                    approved_dates.push(val.fromDate);
+                }
+                else if (val.status == "Rejected") {
+                    rejected_dates.push(val.fromDate);
+                }
+                else {
+                    withdraw_dates.push(val.fromDate);
+                }
+            });
+            //html += "</tbody>";
+            $("#tblleavehistory").html(html);
+            $("#attendance-calendar").datepicker({
+                format: "dd/mm/yyyy",
+                autoclose: true,
+                todayHighlight: false,
+                daysOfWeekHighlighted: ["0"],
+                weekStart: "1",
+                beforeShowDay: function (date) {
+                    var d = date;
+                    var curr_date = ('0' + (d.getDate())).slice(-2);
+                    var curr_month = ('0' + (d.getMonth() + 1)).slice(-2); //Months are zero based
+                    var curr_year = d.getFullYear();
+                    var formattedDate = curr_date + "/" + curr_month + "/" + curr_year
+                    if ($.inArray(formattedDate, pending_dates) != -1) {
+                        return {
+                            classes: 'PresentDay'
+                        };
+                    }
+
+                    else if ($.inArray(formattedDate, approved_dates) != -1) {
+                        return {
+                            classes: 'AbsentDay'
+                        };
+                    }
+                    else if ($.inArray(formattedDate, rejected_dates) != -1) {
+                        return {
+                            classes: 'RejectedDay'
+                        };
+                    }
+                    else if ($.inArray(formattedDate, withdraw_dates) != -1) {
+                        return {
+                            classes: 'WithdrawDay'
+                        };
+                    }
+                    $("#attendance-calendar table").addClass('table-bordered');
+                    $("#attendance-calendar .day.PresentDay").append("<i class='fa fa-fw fa-circle'></i>");
+                    $("#attendance-calendar .day.PresentDay").attr('title', 'Pending For Approval');
+                    $("#attendance-calendar .day.AbsentDay").attr('title', 'Approved Leave');
+                    $("#attendance-calendar .day.AbsentDay").append("<i class='fa fa-fw fa-circle'></i>");
+                    $("#attendance-calendar .day.RejectedDay").attr('title', 'Rejected Leave');
+                    $("#attendance-calendar .day.RejectedDay").append("<i class='fa fa-fw fa-circle'></i>");
+                    $("#attendance-calendar .day.WithdrawDay").attr('title', 'Whitdrawl Leave');
+                    $("#attendance-calendar .day.WithdrawDay").append("<i class='fa fa-fw fa-circle'></i>");
+                    return;
+                }
+            });
+            $("#attendance-calendar table").addClass('table-bordered');
+            $("#attendance-calendar .day.PresentDay").append("<i class='fa fa-fw fa-circle'></i>");
+            $("#attendance-calendar .day.PresentDay").attr('title', 'Pending For Approval');
+            $("#attendance-calendar .day.AbsentDay").attr('title', 'Approved Leave');
+            $("#attendance-calendar .day.AbsentDay").append("<i class='fa fa-fw fa-circle'></i>");
+            $("#attendance-calendar .day.RejectedDay").attr('title', 'Rejected Leave');
+            $("#attendance-calendar .day.RejectedDay").append("<i class='fa fa-fw fa-circle'></i>");
+            $("#attendance-calendar .day.WithdrawDay").attr('title', 'Whitdrawl Leave');
+            $("#attendance-calendar .day.WithdrawDay").append("<i class='fa fa-fw fa-circle'></i>");
+            setTimeout(function () { $("#loader").hide(); }, 0);
+
+        }).fail(function () {
+            setTimeout(function () { $("#loader").hide(); }, 0);
+
+            alert("error");
+        });
+    }
+
+    var pending_dates = [];
+    var approved_dates = [];
+    var rejected_dates = [];
+    var withdraw_dates = [];
+    $(document).ready(function () {
+        setTimeout(function () { $("#loader").show(); },0);
+        $(".knob").knob(
+            {
+                'min': 0,
+                'max': 300
+            }
+        );
+        //$(document).on(".prev", "click", function () {
+        //    $("#loader").show();
+        //    getleavehistory();
+        //    $("#attendance-calendar .day.PresentDay").append("<i class='fa fa-fw fa-circle'></i>");
+        //    $("#attendance-calendar .day.AbsentDay").append("<i class='fa fa-fw fa-circle'></i>");
+        //});
+        getleavehistory();
+    });
+</script>
+
+<section class="content">   
+    <section class="col-lg-6">
+        <div class="box box-solid">
+            <div class="box-header">
+                <i class="fa fa-calendar"></i>
+                <h3 class="box-title  trn" data-trn-key="attendancesummary">Attendance Summary</h3>
+                <div class="pull-right box-tools">
+                </div>
+            </div>
+            <div class="box-body no-padding">
+                <!--The calendar -->
+                <div id="attendance-calendar" style="width: 100%"></div>
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer text-black" style="border-top:0px;">
+                <div class="row">
+                </div>
+            </div>
+        </div>
+        <!-- /.box -->
+
+    </section>
+
+    <section class="col-lg-6">
+        <div class="box box-solid">
+            <div class="box-header"> <i class="fa fa-calendar"></i> <h3 class="box-title trn" data-trn-key="pendingleaverequest">Pending Leave Requests</h3></div>
+            <div class="box-body table-responsive no-padding">
+                <table class="table table-hover">
+                    <thead><tr><th class="trn" data-trn-key="leavedate">Leave Date</th><th class="trn" data-trn-key="leavestatus">Leave Status</th><th class="trn" data-trn-key="leavecategory">Leave Category</th></thead>
+                    <tbody id="tblleavehistory"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    
+</section>
+<section class="content">
+    <section class="col-lg-6">
+        <!-- solid sales graph -->
+        <div class="box box-solid">
+            <div class="box-header"> <i class="fa fa-th"></i> <h3 class="box-title trn" data-trn-key="leavetrends">Leave Trends</h3></div>
+
+            <div class="box-footer no-border">
+                <div class="row">
+                    @{ int count = 0;}
+                    @foreach (var items in Model.LeaveQuota)
+                    {
+                        if (count % 2 == 0)
+                        {
+                            <div class="col-xs-3 text-center" style="border-right: 1px solid #f4f4f4">
+                                <input type="text" class="knob" data-readonly="true" value="@items.Quota" data-width="60" data-height="60" data-fgColor="#33cccc">
+                                <div class="">@items.LeaveCategory</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-xs-3 text-center" style="border-right: 1px solid #f4f4f4">
+                                <input type="text" class="knob" data-readonly="true" value="@items.Quota" data-width="60" data-height="60" data-fgColor="#99cc33">
+                                <div class="">@items.LeaveCategory</div>
+                            </div>
+                        }
+                        count++;
+                    }
+                    <div class="col-xs-12 text-center">
+                        <table class="table table-striped" style='margin-top: 10px;margin-bottom:0px;'>
+                            <thead>
+                                <tr>
+                                    <th class="text-center  trn" data-trn-key="leavecategory">Leave Category</th>
+                                    <th class="text-center  trn" data-trn-key="leavequota">Leave Quota</th>
+                                    <th class="text-center  trn" data-trn-key="balanceleaveQ">Balance Leave</th>
+                                    <th class="text-center  trn" data-trn-key="approvedLeaves">Approved Leaves</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var items in Model.LeaveQuota)
+                                {
+                                    <tr>
+                                        <td>@items.LeaveCategory</td>
+                                        <td>@items.Quota</td>
+                                        <td>@items.BalanceLeave</td>
+                                        <td>@items.TotalLeaves</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+

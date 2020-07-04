@@ -1,0 +1,207 @@
+﻿
+@model BlueCollaredLeaveSolution.Models.LeaveHistoryModelViewModel
+@{
+    ViewData["Title"] = "LeaveHistory";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Scripts{
+    <script src="~/js/jquery.dataTables.min.js"></script>
+    <link href="~/JQTable/jquery-ui.css" rel="stylesheet" />
+    <link href="~/JQTable/dataTables.jqueryui.min.css" rel="stylesheet" />
+    <link href="~/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+}
+<script>
+    $(document).ready(function () {
+        $(document).on("click", "#btnExcelId", function () {
+            var url = '@Url.Content("~/")' + "LeaveHistory/GetApproverName";
+            $.getJSON(url, {}, function (data) {
+                var lang = localStorage.getItem("language");
+                var alertmsg = "Are you sure you want to send it to " + data.data[0] + "?";
+                if (lang == "h") {
+                    alertmsg = "क्या आप वाकई " + data.data[0]+" को भेजना चाहते हैं?";
+                }
+                else if (lang == "m") {
+                    alertmsg = "आपली खात्री आहे की आपण ते " + data.data[0]+" पाठवू इच्छिता?";
+                }
+                else if (lang == "k") {
+                    alertmsg = "ನೀವು ಅದನ್ನು ಅನುಮೋದಿಸಲು ಕಳುಹಿಸಲು ಖಚಿತವಾಗಿ ಬಯಸುವಿರಾ" + data.data[0];
+                }
+                else if (lang == "g") {
+                    alertmsg = "શું તમે ખરેખર " + data.data[0]+" ને મોકલવા માંગો છો?";
+                }
+                else if (lang == "b") {
+                    alertmsg = "আপনি কি নিশ্চিত আপনি এটিকে অনুমোদক পাঠাতে চান ?" + data.data[0];
+                }
+                var r = confirm(alertmsg);
+                if (r == true) {
+                    var year = $("#HistoryYear").val();
+                    GetLeaveHistoryYear(year, "yes" , data.data[1]);
+                }
+            });
+        });
+        $("#loader").show();
+        var y = new Date();
+        var year = y.getFullYear();
+        GetLeaveHistoryYear(year,"");
+
+        //getting current year
+        var d = new Date();
+        for (var i = 0; i <= 3; i++) {
+            var option = "<option value=" + parseInt(d.getFullYear() - i) + ">" + parseInt(d.getFullYear() - i) + "</option>"
+            $('[id*=Year]').append(option);
+        }
+
+        $("#HistoryYear").on("change", function () {
+            $("#loader").show();
+            var year = $("#HistoryYear").val();
+            GetLeaveHistoryYear(year,"");
+        });
+
+    });
+
+    function GetLeaveHistoryYear(year,download,email) {
+        $("#loader").show();
+        var url = '@Url.Content("~/")' + "LeaveHistory/GetHolidayListByYear";
+        $.getJSON(url, { Year: year, download: download, Email: email }, function (data) {
+            if (download == "yes") {
+                $("#loader").hide();
+                if (data.result == false) {
+                    alert("Error..Please try after some time..")
+                }
+                else {
+                    var alertmsg = "File successfully sent..";
+                    var lang = localStorage.getItem("language");
+                    if (lang == "h") {
+                        alertmsg = "ફાઇલ સફળતાપૂર્વક મોકલી છે";
+                    }
+                    else if (lang == "m") {
+                        alertmsg = "ફાઇલ સફળતાપૂર્વક મોકલી છે";
+                    }
+                    else if (lang == "k") {
+                        alertmsg = "ಫೈಲ್ ಯಶಸ್ವಿಯಾಗಿ ಕಳುಹಿಸಲಾಗಿದೆ";
+                    }
+                    else if (lang == "g") {
+                        alertmsg = "ફાઇલ સફળતાપૂર્વક મોકલી..";
+                    }
+                    else if (lang == "b") {
+                        alertmsg = "ফাইল সফলভাবে প্রেরণ করা হয়েছে";
+                    }
+                    alert(alertmsg);
+                }
+            }        
+            if (data.length != 0) {
+                var my_columns = [];
+                var my_item = {};
+                my_item.data = 'leaveCategory';
+                my_columns.push(my_item);
+                var my_item = {};
+                my_item.data = 'leaveAppliedDate';
+                my_columns.push(my_item);
+                var my_item = {};
+                my_item.data = 'fromDate';
+                my_columns.push(my_item);
+                var my_item = {};
+                my_item.data = 'toDate';
+                my_columns.push(my_item);
+                var my_item = {};
+                my_item.data = 'leaveType';
+                my_columns.push(my_item);
+                var my_item = {};
+                my_item.data = 'totalLeaves';
+                my_columns.push(my_item);
+
+                var my_item = {};
+                my_item.data = 'approverName';
+                my_columns.push(my_item);
+
+                var my_item = {};
+                my_item.data = 'status';
+                my_columns.push(my_item);
+
+                var my_item = {};
+                my_item.data = 'errorMsg';
+                my_columns.push(my_item);
+
+                var my_item = {};
+                my_item.data = 'indicator';
+                my_columns.push(my_item);
+
+                $('#HistoryTable').DataTable({
+                    data: data.data.leaveHistory, "destroy": true,
+                    "columns": my_columns,
+                    order: [1, 'desc'],
+                    "columnDefs": [
+                        { "orderable": false, "targets": [0,2,3,4,5,6,7,8,9] }
+                    ],
+                   
+                    "initComplete": function (settings, json) {
+                        $("#loader").hide();
+                    }
+                });
+            }
+        });
+    }
+</script>
+<style>
+    #HistoryTable {
+        border-bottom: 1px solid #dee2e6;
+    }
+    strong.Approved, strong.Withdrawal {
+        color: green;
+    }
+    strong.Rejected {
+        color: red
+    }
+    strong.Pending {
+        color: darkgoldenrod;
+    }
+
+    #HistoryTable span {
+        display: none;
+    }
+</style>
+<section class="content">
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-primary BorderBottom-blue">
+                <div class="box-header">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <h3 class="box-title trn" data-trn-key="leavehistory">
+                                Leave History
+                            </h3>
+                        </div>
+                        <div class="col-lg-2">
+
+                            <select asp-for="@Model.Year" id="HistoryYear" class="form-control"></select>
+                        </div>
+                        <div class="col-lg-2">
+                            <button type="button" class="btn btn-success trn pull-right" data-dismiss="modal" data-trn-key="exporttoexcel" data-toggle="modal" id="btnExcelId">Send to Approver</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body table-responsive">
+                    <table id="HistoryTable" class="table table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th data-trn-key="leavecategory" class="trn">Leave Category</th>
+                                <th data-trn-key="leaveapplieddate" class="trn">Leave Applied Date</th>
+                                <th data-trn-key="fromdate" class="trn">From Date</th>
+                                <th data-trn-key="todate" class="trn">To Date</th>
+                                <th data-trn-key="leavetype" class="trn">Leave Type</th>
+                                <th data-trn-key="totalappliedleaves" class="trn">Total Applied Leaves</th>
+                                <th data-trn-key="approver" class="trn">Approver</th>
+                                <th data-trn-key="status" class="trn">Status</th>
+                                <th data-trn-key="saperrormessg" class="trn">Details of Leave Request</th>
+                                <th data-trn-key="sapstatus" class="trn">SAP Status</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

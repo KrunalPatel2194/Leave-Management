@@ -1,0 +1,90 @@
+﻿
+@{
+
+    ViewData["Title"] = "LoginTimeOut";
+    Layout = null;
+}
+
+<link rel="stylesheet" href="~/css/bootstrap.css?v=9" />
+<link rel="stylesheet" href="~/css/font-awesome.min.css" />
+<link rel="stylesheet" href="~/css/AdminLTE.css?v=8" />
+<link rel="stylesheet" href="~/css/_all-skins.min.css" />
+<body class="hold-transition skin-blue layout-top-nav">
+    <div class="wrapper">
+        <header class="main-header">
+            <nav class="nav navbar-static-top" style="background:#ffffff">
+                <ul class="nav navbar-nav" style="width:100%">
+                    <li class="dropdown" style="    width: 15%; padding: 3px 0px 3px 5px;">
+                        <a class="no-padding" href="#" style="padding-top:3px;padding-bottom:3px;">
+                            <img src="~/Images/TATA Motors Connecting Aspirations Biru_new.jpg"
+                                 alt="Tata Motor Connecting Aspiration Logo" title="Tata Motor Connecting Aspiration Logo" style="width: 115px;">
+                        </a>
+                    </li>
+                    <li class="dropdown" style="font-size: 20px;font-weight: 800;color: #2f7de1;text-align: center; width:73%">
+                        <label class=" trn" data-trn-key="projectnameheader">Self-Service Leave & Attendance Management System</label>
+                    </li>
+                    <li class="dropdown pull-right" style="width: 8%; padding: 3px 5px 3px 0px;">
+                        <a class="no-padding" href="#" style="padding-top:3px;padding-bottom:3px;"><img src="~/Images/tata_logo.png" alt="Tata Motor Logo" title="Tata Motor Logo"></a>
+                    </li>
+                </ul>
+            </nav>
+
+        </header>
+        <div class="content-wrapper">
+            <div class="container">
+
+                <div class="error-template text-center">
+                    <br /> <br /> <br /> <br />
+                    <h1> <span class="trn" data-trn-key="alert">Alert</span></h1>
+                    <br />
+                    @if (@ViewBag.loginstatus == "concurrentlogin")
+                    {
+                        <h3>
+                            <span class="trn" data-trn-key="logoutmessage">Your session is currently active.So, you can login after</span>:<strong> @ViewBag.logintime </strong>
+                        </h3>
+                    }
+                    @if (@ViewBag.loginstatus == "loginattempfailed")
+                    {
+                        <h3>
+                            <span class="trn" data-trn-key="loginattempt"></span>
+                            <br />
+                            <br />
+                            <span><strong> @ViewBag.logintime </strong></span>
+                        </h3>
+                    }
+                    <br>
+                    <div class="col-lg-12 text-center">
+                        <a href="@Url.Action("LoginHome", "Account")" class="btn btn-lg btn-warning">
+                            <i class="fa fa-arrow-left"></i> <span class="trn" data-trn-key="back">Back</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.content-wrapper -->
+        <footer class="main-footer">
+            <div class="container">
+                <div class="pull-right hidden-xs" style="display:none">
+                    For any queries/support, please contact ITSERVICEDESK at   <strong>
+                        itservicedesk@tatamotors.com
+                    </strong> OR call <strong>
+                        020 6623 4747
+                    </strong>
+                </div>
+                <strong>Copyright &copy; @DateTime.Today.Year-@DateTime.Today.AddYears(1).Year <a href="https://www.tatamotors.com">Tata Motors Ltd</a>.</strong> All rights
+                reserved.
+            </div>
+            <!-- /.container -->
+        </footer>
+    </div>
+</body>
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/js/jquery.translate.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/lib/jquery/dist/mvc-grid.js"></script>
+<script src="~/lib/jquery/dist/Chart.bundle.min.js"></script>
+<script src="~/lib/jquery/dist/loader.js"></script>
+<script src="~/js/adminlte.min.js"></script>
+<script src="~/js/mainlanguage.js?v=2"></script>
+

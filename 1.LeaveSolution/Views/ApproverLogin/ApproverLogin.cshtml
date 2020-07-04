@@ -1,0 +1,146 @@
+﻿@model BlueCollaredLeaveSolution.Models.ApproverLogin
+
+@{
+    ViewData["Title"] = "Login";
+}
+<br />
+
+<style>
+    nav.nav.navbar-static-top {
+        padding: 15px;
+    }
+
+    label.trn {
+        color: #000;
+    }
+
+    .form-horizontal .has-feedback .form-control-feedback {
+        color: #ababab;
+    }
+
+    .content-wrapper {
+        background-repeat: no-repeat;
+        min-height: 684px;
+        background-image: url('../Images/background.jpg');
+        background-size: cover;
+    }
+
+    .box {
+        border-radius: 5px !important;
+        box-shadow: unset;
+    }
+
+    .box-header {
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+
+    .btn-danger {
+        background-color: #ff6666;
+        border-color: #ff6666;
+    }
+
+    .btn-success {
+        background-color: #33cc80;
+        border-color: #33cc80;
+    }
+
+    .btn {
+        padding: 5px 19px;
+        margin: 0px 5px;
+    }
+
+    .login-box-sec {
+        margin: 10% 32%;
+    }
+
+    .form-control {
+        border-color: #ddd;
+        border-radius: 4px;
+        background-color: white !important;
+    }
+
+    .link {
+        cursor: pointer;
+        color: #5f5fe2 !important;
+        font-weight: normal;
+        margin-top: 4px;
+    }
+
+    .input-group .form-control, .input-group-addon, .input-group-btn {
+        display: table-cell;
+    }
+</style>
+<script type="text/javascript" src="~/js/aes.js"></script>
+<section class="content">
+    <div class="col-lg-4"></div>
+    <div class="col-lg-4">
+        <div class="login-box-body">
+            <div class="login-logo">
+                <img src="~/Images/TATA Motors Connecting Aspirations Biru_new.jpg">
+            </div>
+            <hr />
+            <h4 style="text-align:center">
+                Enter Login Credentials(Approver)
+            </h4>
+            <form asp-action="ApproverLogin" method="post" class="form-horizontal">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="box-body">
+                    <div class="form-group has-feedback">
+                        <label for="language" class="control-label">User ID:</label>
+                        <input asp-for="UserId" autocomplete="off" title="e.g. abc123456" autofocus class="form-control" new { placeholder="e.g. abc123456" } />
+                        <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+                        <span asp-validation-for="UserId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <label for="language" class="control-label">Password:</label>
+                        <input asp-for="Password" autocomplete="off" class="form-control" data-toggle="password" type="password" new { placeholder="Password" } />
+                        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                </div>
+                <div class="box-footer no-border" style="text-align:center;">
+                    <button type="submit" name="btnloginsubmit" class="btn btn-success" id="btnLoginSubmit"> <i class="fa fa-sign-in" aria-hidden="true"></i>  Login</button>                    
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-4"></div>
+</section>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnLoginSubmit").click(function () {
+            $("#UserId").val($.trim($("#UserId").val()));
+            $("#Password").val($.trim($("#Password").val()));
+            if ($.trim($("#UserId").val()) == "") {
+                alert("Please enter user name");
+                $("#UserId").focus();
+                return false
+            }
+            else if ($.trim($("#Password").val()) == "") {
+                alert("Please enter password");
+                $("#Password").focus();
+                return false;
+            }
+            $("#loader").show();
+            var txtpassword = $('#Password').val();
+            var key = CryptoJS.enc.Utf8.parse('8080808080808080');
+            var iv = CryptoJS.enc.Utf8.parse('8080808080808080');
+
+            var encryptedpassword = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(txtpassword), key,
+
+                { keySize: 128 / 8, iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+
+            $('#Password').val(encryptedpassword);
+            var language = $('input[name=Login]:checked').val();
+            if (typeof (Storage) !== "undefined") {
+                localStorage.setItem("language", language);
+            } else {
+                alert("Sorry, your browser does not support Web Storage...");
+                return false;
+            }
+        });
+    });
+</script>

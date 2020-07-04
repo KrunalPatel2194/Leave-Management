@@ -1,0 +1,221 @@
+﻿@model BlueCollaredLeaveSolution.Models.AttendanceModel
+@using NonFactors.Mvc.Grid;
+@{
+    ViewData["Title"] = "Attendance";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Scripts{
+    <script src="~/js/jquery.dataTables.min.js"></script>
+    <link href="~/JQTable/jquery-ui.css" rel="stylesheet" />
+    <link href="~/JQTable/dataTables.jqueryui.min.css" rel="stylesheet" />
+    <link href="~/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+}
+<script>
+    $(document).ready(function () {
+        $("#loader").show();
+        $('#Attendancegrid').tooltip({
+            placement: 'right',
+            track: true
+        });
+
+        $(".clsredirectleave").click(function () {
+            $("#loader").show();
+            var date = $.trim($(this).parents("tr").find(".clsdate").text());
+            localStorage.setItem("attdate", date);                
+            window.location.href = '@Url.Action("CreateLEaveRequest", "Leave")';
+        });      
+        $("#myTable2").DataTable({
+            "paging": false,
+            "processing": true, // for show progress bar
+            "filter": true, // this is for disable filter (search box)
+            "orderMulti": false, // for disable multiple column at once
+            "scrollCollapse": true,
+            "createdRow": function (row, data, dataIndex) {
+                if (data[1] == 'Off Day') {
+                    $(row).addClass('greenClass');
+                }
+                else if (data[1] == 'Publich Holiday') {
+                    $(row).addClass('holidayClass');
+                }
+            },
+            columnDefs: [{ orderable: false, targets: [5] }],
+        });
+        $("#loader").hide();
+    });
+</script>
+<style>
+    #myTable2 {
+        border-bottom: 1px solid #dee2e6
+    }
+    .greenClass {
+        background-color: #c1ffc1 !important;
+    }
+    .holidayClass {
+        background-color: #ffafc1 !important;
+    }
+</style>
+
+<form asp-controller="Attendance" asp-action="Attendance" data-ajax-method="POST">
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary BorderBottom-blue">
+                    <div class="box-header">
+                        <h3 class="box-title trn" data-trn-key="attendanceEnquiry">
+                            Attendance Enquiry
+                        </h3>
+                    </div>
+
+                    <div class="box-body table-responsive">
+                        <div class="form-group">
+                            <div class="col-lg-3">
+                            </div>
+                            <div class="col-lg-2">
+                                <label data-trn-key="Month" class="trn">Month</label>
+                                <select asp-for="@Model.Month" class="form-control form-group">
+                                    <option value="1">
+                                        January
+                                    </option>
+                                    <option value="2">
+                                        February
+                                    </option>
+                                    <option value="3">
+                                        March
+                                    </option>
+                                    <option value="4">
+                                        April
+                                    </option>
+                                    <option value="5">
+                                        May
+                                    </option>
+                                    <option value="6">
+                                        June
+                                    </option>
+                                    <option value="7">
+                                        July
+                                    </option>
+
+                                    <option value="8">
+                                        August
+                                    </option>
+                                    <option value="9">
+                                        September
+                                    </option>
+                                    <option value="10">
+                                        October
+                                    </option>
+                                    <option value="11">
+                                        November
+                                    </option>
+                                    <option value="12">
+                                        December
+                                    </option>
+
+                                </select>
+                            </div>
+                            <div class="col-lg-2">
+                                <label data-trn-key="Year" class="trn">Year</label>
+                                <select asp-for="@Model.Year" class="form-control">
+                                    <option>
+                                       @DateTime.Now.Year
+                                    </option>
+                                </select>
+
+                            </div>
+                            <div class="col-lg-1">
+                                <label>&nbsp;</label>
+                                <button type="Submit" class="btn form-control btn-success trn" data-trn-key="submit" id="Submit">Submit</button>
+
+                            </div>
+                            <div class="col-lg-4">
+                            </div>
+                        </div>
+                        <table id="myTable2" class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th data-trn-key="Date" class="trn">Date</th>
+                                    <th data-trn-key="Day" class="trn">Day Type</th>
+                                    <th data-trn-key="InTime" class="trn">In Time </th>
+                                    <th data-trn-key="OutTime" class="trn">Out Time</th>
+                                    <th data-trn-key="Shift" class="trn">Shift</th>
+                                    <th data-trn-key="AttendanceRegularization" class="trn">Attendance Regularization</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.ListOfAttendance != null)
+                                {
+                                    foreach (var items in Model.ListOfAttendance)
+                                    {
+                                <tr>
+                                    <td class="clsdate">@items.Date</td>
+                                    @if (items.Day == "W")
+                                    {
+                                        <td>Week Day (@items.DayName)</td>
+                                    }
+                                    else if (items.Day == "O")
+                                    {
+                                        <td>Off Day (@items.DayName)</td>
+                                    }
+                                    else if (items.Day == "P")
+                                    {
+                                        <td>Publich Holiday (@items.DayName)</td>
+                                    }
+                                    else
+                                    {
+                                        <td>@items.Day (@items.DayName)</td>
+                                    }
+                                    @if (items.Intime == null)
+                                    {
+                                        <td>**:**</td>
+                                    }
+                                    else
+                                    {
+                                        <td>@items.Intime</td>
+                                    }
+                                    @if (items.Outtime == null)
+                                    {
+                                        <td>**:**</td>
+                                    }
+                                    else
+                                    {
+                                        <td>@items.Outtime</td>
+                                    }
+
+                                    <td>@items.Firsthalf</td>
+                                    @if (items.AttendanceRegularization != "No" && items.Day == "W")
+                                    {
+                                        <td><a class="clsredirectleave" href="#">@items.AttendanceRegularization</a></td>
+                                    }
+                                    else
+
+                                    {
+                                        <td></td>
+                                    }
+                                </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="form-group row" style=" color:red;">
+                        <div class="col-lg-12">
+                            <label class="trn" data-trn-key="message1">Attendance Regularization Guidlines:-</label>
+                            <ui style=" color:red;">
+                                <li class="col-lg-12 trn" data-trn-key="message2">
+                                    For attendance regularize please clickon  Regularize the Attendance  link.
+                                </li>
+                                <li class="col-lg-12 trn" data-trn-key="message3">
+                                    It will redirect you to Leave Request Management tab select their Attendance  category and other details and submit the page.
+                                </li>
+                                <li class="col-lg-12 trn" data-trn-key="message4">
+                                    Please note that You can only regularize attendance 3 months prior to todays date.
+                                </li>
+                            </ui>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</form>
+

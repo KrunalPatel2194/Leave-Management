@@ -1,0 +1,354 @@
+﻿@using Microsoft.AspNetCore.Http;
+@using BlueCollaredLeaveSolution.Core;
+@using Newtonsoft.Json;
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="~/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="~/favicon.ico" type="image/x-icon">
+    <title>@ViewData["Title"]-BlueCollaredLeaveSystem</title>
+    <environment include="Development">
+        <link rel="stylesheet" href="~/css/bootstrap.css?v=9" />
+        <link rel="stylesheet" href="~/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="~/css/AdminLTE.css?v=8" />
+        <link rel="stylesheet" href="~/css/_all-skins.min.css?v=2" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="~/css/bootstrap.css?v=6" />
+        <link rel="stylesheet" href="~/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="~/css/AdminLTE.css?v=7" />
+        <link rel="stylesheet" href="~/css/_all-skins.min.css?v=2" />
+    </environment>
+    <style>
+        .dropdown-menu > li > a {
+            color: #777;
+            display: block;
+            padding: 3px 20px;
+            white-space: nowrap;
+        }
+
+        .navbar-nav > li > .dropdown-menu {
+            margin-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+
+        div#loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            text-align: center;
+            width: 100%;
+            padding-top: 35vh;
+            background-color: #00000080;
+            height: 100%;
+            z-index: 999;
+            display: none;
+        }
+
+        .box-header-custom {
+            color: #307ee2;
+            display: block;
+            padding: 3px;
+            position: relative;
+            background-color: #fff;
+        }
+
+        .padding-top {
+            padding-top: 5px;
+        }
+
+        .border-left {
+            border-left: 1px solid white;
+        }
+
+        .dropdown-headermain {
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+            border-radius: 0;
+            box-shadow: none;
+            border-color: #d2d6de;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue layout-top-nav">
+    <div class="wrapper">
+        <header class="main-header">
+
+            <nav class="navbar navbar-static-top">
+                <div class="navbar-header">
+                    <a href="#" class="logo">
+                        <!-- logo for regular state and mobile devices -->
+                        <span class="logo-lg"><img class="pull-left" width="55%" src="~/images/logo-white.png" /></span>
+                    </a>
+                </div>
+                @{
+                    string available = "";
+                    <div class="container">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                        </div>
+                        <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
+                            <ul class="nav navbar-nav padding-top">
+                                @if (ViewData["Title"].ToString() != "Hello" && ViewData["Title"].ToString() != "Login" && Context.Session.GetString(Constant.KISOK) == "no")
+                                {
+                                    MenuviewModel menuModel = JsonConvert.DeserializeObject<MenuviewModel>(Context.Session.GetString(Constant.Menu));
+                                    foreach (var item in menuModel.MenuModels)
+                                    {
+                                        if (menuModel.MenuModels.Where(d => d.ParentMenuID == item.MenuID).Count() > 0)
+                                        {
+                                            <li class="dropdown border-left ">
+                                                <a href='@Url.Action(item.Controller, item.Action)' class="dropdown-toggle trn" data-toggle="dropdown" data-trn-key="@item.MenuName">@item.MenuName <span class="caret"></span></a>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    @{ int count = 0;}
+                                                    @foreach (var subitem in menuModel.MenuModels.Where(d => d.ParentMenuID == item.MenuID).ToList())
+                                                    {
+                                                        count++;
+                                                        <li><a class="trn menuloader" href="@Url.Action(subitem.Action, subitem.Controller)">@subitem.MenuName</a></li>
+                                                        if (count < menuModel.MenuModels.Where(d => d.ParentMenuID == item.MenuID).Count())
+                                                        {
+                                                            <li class="divider"></li>
+                                                        }
+
+                                                    }
+                                                </ul>
+                                            </li>
+                                        }
+                                        else if (item.ParentMenuID == 0)
+                                        {
+                                            <li><a data-trn-key="@item.MenuName" class="border-left trn menuloader" href='@Url.Action(item.Action, item.Controller)'>@item.MenuName</a></li>
+                                        }
+                                    }
+                                }
+                            </ul>
+                        </div>
+                        <div class="navbar-custom-menu">
+                            @if (@Context.Session.GetString(Constant.SessionUserName) != null && @Context.Session.GetString(Constant.SessionUserName) != "")
+                            {
+                                available = "yes";
+                                @if (Context.Session.GetString(Constant.KISOK) == "no")
+                                {
+                                    <div class="pull-right padding-top">
+                                        <select id="btnlanguagechange" title="Select Language" class="dropdown-headermain pull-right btn btn-flat">
+                                            <option value="e">English</option>
+                                            <option value="h">हिंदी</option>
+                                            <option value="m">मराठी</option>
+                                            <option value="k">ಕನ್ನಡ</option>
+                                            <option value="b">বাঙালি</option>
+                                            <option value="g">ગુજરાતી</option>
+                                        </select>
+                                    </div>
+                                }
+                                    <ul class="nav navbar-nav padding-top">
+                                        <li class="dropdown user user-menu">
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" title=" @Context.Session.GetString(Constant.SessionUserName)">
+                                                <i class="fa fa-user-o	"></i>
+                                                <span class="hidden-xs"><strong><span class="trn" data-trn-key="welcome">Welcome</span>,</strong>  @Context.Session.GetString("FirstName")</span>
+                                            </a>
+                                            @if (Context.Session.GetString(Constant.KISOK) == "no")
+                                            {
+                                                <ul class="dropdown-menu">
+                                                    <li class="user-header">
+                                                        <div class="row" title="@Context.Session.GetString(Constant.SessionUserName)">
+                                                            <div class="col-lg-12 ">
+                                                                <div class="input-group">
+                                                                    <span> <i class="fa fa-user"></i>&nbsp; @Context.Session.GetString(Constant.SessionUserName)</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row" style="height: 20px; overflow: hidden;">
+                                                            <div class="col-lg-12 ">
+                                                                <div class="input-group">
+                                                                    <span> <i class="fa fa-gear"></i><small style="overflow:hidden;"><b><span class="trn" data-trn-key="persnolarea">Personal Area</span>:</b>@Context.Session.GetString(Constant.PersonalArea)</small></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row" style="height: 20px; overflow: hidden;">
+                                                            <div class="col-lg-12 ">
+                                                                <div class="input-group">
+                                                                    <span> <i class="fa fa-gear"></i><small style="overflow:hidden;"><b><span class="trn" data-trn-key="personalsubarea">Personal Sub-Area</span>: </b>@Context.Session.GetString(Constant.PersonalSubArea)</small></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    <li class="user-footer">
+                                                        <div class="pull-left">
+                                                            <a href='@Url.Action("LeaveDashboard", "LeaveDashboard")' class="btn btn-primary btn-flat" style="background-color:#3c8dbc !important;border-color:#367fa9 !important;"><i class="fa fa-home"></i><span data-trn-key="Home" class="trn">Home</span>  </a>
+                                                        </div>
+                                                        <div class="pull-right">
+                                                            @if (@Context.Session.GetString(Constant.SessionModulName) == "Approver")
+                                                            {
+                                                                <a href='@Url.Action("SignOut", "ApproverLogin")' class="btn btn-warning btn-flat" style="background-color:#d58512 !important; border-color:#985f0d !important;"><i class="fa fa-sign-out"></i><span data-trn-key="logout" class="trn">Log out</span>  </a>
+                                                            }
+                                                            else
+                                                            {
+                                                                <a href='@Url.Action("SignOut", "Account")' class="btn btn-warning btn-flat" style="background-color:#d58512 !important; border-color:#985f0d !important;"><i class="fa fa-sign-out"></i><span data-trn-key="logout" class="trn">Log out</span>  </a>
+                                                            }
+
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            }
+                                        </li>
+                                    </ul>
+                                }
+                            </div>
+                    </div>
+                }
+            </nav>
+        </header>
+        <div class="content-wrapper">
+            @if (Context.Session.GetString(Constant.SessionUserName) != null && Context.Session.GetString(Constant.KISOK) == "yes")
+            {
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div class="box-header-custom with-border">
+                            <div class="col-md-3 col-sm-3 col-lg-3">
+                                <a href="@Url.Action("LeaveDashboard","LeaveDashboard")" class="btn btn-primary btn-flat" style="background-color:#3c8dbc !important;border-color:#367fa9 !important;"><i class="fa fa-home"></i><span data-trn-key="Home" class="trn">Home</span>  </a>
+                            </div>
+                            <div style="padding-top: 7px; font-weight: bold;" class="col-md-6 col-sm-6 col-lg-6">
+                                <marquee>
+                                    <div class=" trn" data-trn-key="projectnameheader">
+                                        Self-Service Leave & Attendance Management System
+                                    </div>
+                                </marquee>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-lg-3">
+                                <select id="btnlanguagechange" title="Select Language" class="dropdown-headermain pull-right btn btn-flat">
+                                    <option value="e">English</option>
+                                    <option value="h">हिंदी</option>
+                                    <option value="m">मराठी</option>
+                                    <option value="k">ಕನ್ನಡ</option>
+                                    <option value="b">বাঙালি</option>
+                                    <option value="g">ગુજરાતી</option>
+                                </select> &nbsp;
+                                <a href="@Url.Action("SignOut","Account")" class="btn btn-warning btn-flat pull-right" style="background-color:#d58512 !important; border-color:#985f0d !important;"><i class="fa fa-sign-out"></i><span data-trn-key="logout" class="trn">Log Out</span>  </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div class="box-header-custom with-border">
+                            <marquee>
+                                <div style=" font-weight: bold;" class=" trn" data-trn-key="projectnameheader">
+                                    Self-Service Leave & Attendance Management System
+                                </div>
+                            </marquee>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="container">
+                <div id="loader">
+                    <img src="~/images/loader-transparent.gif" style="width: 260px;" />
+                </div>
+                <partial name="_CookieConsentPartial" />
+                <partial name="_Alert" />
+                @if (Context.Session.GetString(Constant.SessionUserName) != null && Context.Session.GetString(Constant.KISOK) == "yes")
+                {
+                    <div class="box-footer" style="text-align:center;">
+                        @if (ViewData["Title"].ToString() != "Hello" && ViewData["Title"].ToString() != "Login")
+                        {
+                            MenuviewModel menuModel = JsonConvert.DeserializeObject<MenuviewModel>(Context.Session.GetString(Constant.Menu));
+                            foreach (var item in menuModel.MenuModels)
+                            {
+
+                                @if (menuModel.MenuModels.Where(d => d.ParentMenuID == item.MenuID).Count() > 0)
+                                {
+                                    @foreach (var subitem in menuModel.MenuModels.Where(d => d.ParentMenuID == item.MenuID).ToList())
+                                    {
+                                        <a class="trn btn-lg btn menuloader btn-primary" href="@Url.Action(subitem.Action, subitem.Controller)">@subitem.MenuName</a>
+                                    }
+                                }
+                                else if (item.ParentMenuID == 0 && item.MenuName != "Home")
+                                {
+                                    <a data-trn-key="@item.MenuName" class="btn btn-lg menuloader btn-primary trn" href='@Url.Action(item.Action, item.Controller)'>@item.MenuName</a>
+                                }
+                            }
+                        }
+                    </div>
+                }
+                @RenderBody()
+            </div>
+        </div>
+        <!-- /.content-wrapper -->
+        <footer class="main-footer">
+            <div class="container">
+                <strong>Copyright &copy; @DateTime.Today.Year-@DateTime.Today.AddYears(1).Year </strong> All rights
+                reserved.
+            </div>
+            <!-- /.container -->
+        </footer>
+    </div>
+    <script>
+        //$(function () {
+
+        //});
+        $(document).ready(function () {
+            $("#btnlanguagechange").tooltip();
+            var fetchlang = localStorage.getItem("language");
+            $("#btnlanguagechange").val(fetchlang);
+            $('#btnlanguagechange').change(function () {
+                $("#loader").show();
+                localStorage.setItem("language", $(this).val());
+                window.location.reload(1);
+            });
+            if ('@available' == 'yes') {
+                ResetTimeOutTimer();
+            }
+
+            $('.menuloader').click(function () {
+                $("#loader").show();
+            });
+
+            //$('.dropdown').hover(function () {
+            //    $(this).addClass('open');
+            //},
+            //    function () {
+            //        $(this).removeClass('open');
+            //    });
+        });
+
+         var timeoutTimer;
+        var remainTimer;
+        function ResetTimeOutTimer() {
+            clearTimeout(timeoutTimer);
+            clearTimeout(remainTimer);
+            var remainNow = ((20 - 5) * 60) * 1000;//100000;
+            remainTimer = setTimeout(function () {
+                if (confirm('Are you sure continue this session ?') == true) {
+                      var url = '@Url.Action("ExtendSession", "Account")';
+                    $.getJSON(url, {}, function (data) {
+                        console.log("session active");
+                    });
+                }                              
+            }, remainNow);
+
+            var timeoutNow = (20 * 60) * 1000;
+            timeoutTimer = setTimeout(function () {
+                alert("Your Session is Expired. Please Login again.");
+                window.location.href = '@Url.Action("SignOut", "Account")';
+            }, timeoutNow);
+        }
+    </script>
+    <script src="~/lib/jquery/dist/jquery.js?v=1"></script>
+    <script src="~/js/jquery.translate.js?v=1"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js?v=1"></script>
+    <script src="~/js/site.js?v=1" asp-append-version="true"></script>
+    <script src="~/lib/jquery/dist/mvc-grid.js?v=1"></script>
+    <script src="~/lib/jquery/dist/Chart.bundle.min.js?v=1"></script>
+    <script src="~/lib/jquery/dist/loader.js?v=1"></script>
+    <script src="~/js/adminlte.min.js?v=1"></script>
+    <script src="~/js/mainlanguage.js?v=1"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

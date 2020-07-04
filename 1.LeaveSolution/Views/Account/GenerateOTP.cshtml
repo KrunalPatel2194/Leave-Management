@@ -1,0 +1,460 @@
+﻿@model BlueCollaredLeaveSolution.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Hello";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Scripts{
+    <meta charset="utf-8">
+    <link href="~/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <script src="~/js/jquery.inputmask.js"></script>
+    <script src="~/js/jquery.inputmask.date.extensions.js"></script>
+    <script src="~/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+}
+<script type="text/javascript" src="~/js/aes.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#loader").show();
+        $("#EmployeeID").val("");
+        $('#EmployeeDOB').inputmask('dd-mm-yyyy', { 'placeholder': 'dd-mm-yyyy' })
+        $('#EmployeeDOB').datepicker({
+            format: 'dd-mm-yyyy',
+            autoclose: true
+        });
+
+        $("#btnSubmit").click(function () {
+            $("#loader").show();
+            var url = '@Url.Content("~/")' + "Account/GetMobileno";
+            var empid = "#EmployeeID";
+            var lang = localStorage.getItem("language");
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: { employeeid: $.trim($(empid).val())},
+                dataType: "json",
+                success: function (data) {
+                    $("#loader").hide();
+                    if (data == 2) {
+                        if (lang == "h") {
+                            alert("कृप्या मान्य कर्मचारी आयडी दर्ज करे");
+                        }
+                        else if (lang == "m") {
+                            alert("कृपया वैध कर्मचारी आयडी निवडा");
+                        }
+                        else if (lang == "k") {
+                            alert("ದಯವಿಟ್ಟು ಮಾನ್ಯ ಉದ್ಯೋಗಿ ಐಡಿ ನಮೂದಿಸಿ");
+                        }
+                        else if (lang == "g") {
+                            alert("મહેરબાની કરીને માન્ય કર્મચારી દાખલ કરો");
+                        }
+                        else if (lang == "b") {
+                            alert("অনুগ্রহ বৈধ কর্মচারী নির্বাচন করা");
+                        }
+                        else {
+                            alert("Please enter valid EmployeeID");
+                        }
+                        // alert("Please enter valid EmployeeID");
+                        $("#EmployeeID").val("");
+                        $("#EmployeeID").focus();
+                    }
+                    else if (data == 4) {
+                        if (lang == "h") {
+                            alert("SAP HR सिस्टम में आपका आधिकारिक मोबाइल नंबर अपडेट नहीं किया गया है। अपडेट करने के लिए कृपया एचआर विभाग से संपर्क करें।");
+                        }
+                        else if (lang == "m") {
+                            alert("आपला अधिकृत मोबाइल नंबर एसएपी एचआर सिस्टममध्ये अद्यतनित केलेला नाही. अद्यतनित करण्यासाठी कृपया मानव संसाधन विभागाशी संपर्क साधा.");
+                        }
+                        else if (lang == "k") {
+                            alert("ನಿಮ್ಮ ಅಧಿಕೃತ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಯನ್ನು SAP HR ವ್ಯವಸ್ಥೆಯಲ್ಲಿ ನವೀಕರಿಸಲಾಗಿಲ್ಲ. ನವೀಕರಿಸಲು ದಯವಿಟ್ಟು ಮಾನವ ಸಂಪನ್ಮೂಲ ಇಲಾಖೆಯನ್ನು ಸಂಪರ್ಕಿಸಿ.");
+                        }
+                        else if (lang == "g") {
+                            alert("તમારો મોબાઇલ નંબર એસએપી એચઆર સિસ્ટમમાં અપડેટ થયો નથી. અપડેટ કરવા માટે કૃપા કરીને એચઆર વિભાગનો સંપર્ક કરો.");
+                        }
+                        else if (lang == "b") {
+                            alert("আপনার অফিসিয়াল মোবাইল নম্বরটি এসএপ এইচআর সিস্টেমে আপডেট করা হয়নি। আপডেট করতে দয়া করে এইচআর অধিদপ্তরের সাথে যোগাযোগ করুন।");
+                        }
+                        else {
+                            alert("Your official mobile number is NOT updated in SAP HR system. Please contact HR dept to update.");
+                        }
+                        $("#EmployeeID").val("");
+                        $("#EmployeeID").focus();
+                    }
+                    else if (data == 3) {
+                        if (lang == "h") {
+                            alert("आप MYLEAVES प्रणाली का उपयोग करने के लिए अधिकृत नहीं हैं। किसी भी प्रश्न के लिए कृपया अपने एचआर विभाग से संपर्क करें!");
+                        }
+                        else if (lang == "m") {
+                            alert("आपण सिस्टम वापरण्यास अधिकृत नाही. कोणत्याही प्रश्नांसाठी कृपया आपल्या एचआर विभागाशी संपर्क साधा!");
+                        }
+                        else if (lang == "k") {
+                            alert("MYLEAVES ಸಿಸ್ಟಮ್ ಅನ್ನು ಬಳಸಲು ನಿಮಗೆ ಅಧಿಕಾರವಿಲ್ಲ. ಯಾವುದೇ ಪ್ರಶ್ನೆಗಳಿಗೆ ದಯವಿಟ್ಟು ನಿಮ್ಮ ಮಾನವ ಸಂಪನ್ಮೂಲ ಇಲಾಖೆಯನ್ನು ಸಂಪರ್ಕಿಸಿ!");
+                        }
+                        else if (lang == "g") {
+                            alert("તમે સિસ્ટમનો ઉપયોગ કરવા માટે અધિકૃત નથી. કૃપા કરીને તમારા એચઆર વિભાગનો કોઈપણ પ્રશ્નો માટે સંપર્ક કરો!");
+                        }
+                        else if (lang == "b") {
+                            alert("আপনি MYLEAVES সিস্টেম ব্যবহারের জন্য অনুমোদিত নন। দয়া করে যে কোনও প্রশ্নের জন্য আপনার এইচআর অধিদপ্তরের সাথে যোগাযোগ করুন!");
+                        }
+                        else {
+                            alert("You are not authorized to use MYLEAVES system. Kindly contact your HR dept. for any queries!");
+                        }
+                        $("#EmployeeID").val("");
+                        $("#EmployeeID").focus();
+                    }
+                    else if (data == 1) {
+                        //
+                        if (lang == "h") {
+                            alert("कर्मचारी पहले से मौजूद है !!! यदि आप अपना पासवर्ड भूल गए हैं तो कृप्या फिर से कायम करें पासवर्ड पर क्लिक करें");
+                        }
+                        else if (lang == "m") {
+                            alert("कर्मचारी आधीच अस्तित्त्वात आहेत !!! आपण आपला संकेतशब्द विसरल्यास कृपया रीसेट करा पासवर्ड वर क्लिक करा");
+                        }
+                        else if (lang == "k") {
+                            alert("ಉದ್ಯೋಗಿ ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ !!! ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ನೀವು ಮರೆತಿದ್ದರೆ ದಯವಿಟ್ಟು ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸಿ ಕ್ಲಿಕ್ ಮಾಡಿ");
+                        }
+                        else if (lang == "g") {
+                            alert("કર્મચારી પહેલેથી જ અસ્તિત્વમાં છે !!! જો તમે તમારો પાસવર્ડ ભૂલી ગયા છો, તો મહેરબાની કરીને ફરીથી સેટ કરો પાસવર્ડ પર ક્લિક કરો");
+                        }
+                        else if (lang == "b") {
+                            alert("কর্মী ইতিমধ্যে বিদ্যমান !!! আপনি যদি নিজের পাসওয়ার্ড ভুলে গিয়ে থাকেন তবে দয়া করে রিসেট পাসওয়ার্ডটিতে ক্লিক করুন");
+                        }
+                        else {
+                            alert("Employee already Exist!!! \r\n If you forgot your password please click on Reset Password");
+                        }
+                        //alert("Employee already Exist!!! \r\n If you forgot your password please click on Reset Password");
+                        window.location.href = 'Login';
+                    }
+                    else if (data != 0) {
+                        //window.location.href = 'GenerateOTP';
+                        //$('#MobileNO').prop('readonly', false);
+                        $("#MobileNO").val(data);
+                        $("#ConfirmMobileNo").modal("show");
+                    }
+                }
+            });
+        });
+        $("#btnyes").click(function () {
+            var url = '@Url.Content("~/")' + "Account/GenerateOTPbyid";
+            var empid = "#EmployeeID";
+            var lang = localStorage.getItem("language");
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: { employeeid: $.trim($(empid).val()) },
+                dataType: "json",
+                success: function (data) {
+                    if (data == 1) {
+                        $("#ConfirmMobileNo").modal("hide");
+                        $("#EnterOTP1").modal("show");
+                    }
+                    else if (data == -1) {
+                        $("#ConfirmMobileNo").modal("hide");
+                        alert("Please try after some time to regenerate OTP.");
+                    }
+                    else {
+                        if (lang == "h") {
+                            alert("ओटीपी जनरेट करने के दौरान ग़लती आई.");
+                        }
+                        else if (lang == "m") {
+                            alert("ओटीपी उत्पन्न करा चूक झाली.");
+                        }
+                        else if (lang == "k") {
+                            alert("ಒಟಿಪಿ ರಚಿಸುವಾಗ ದೋಷ ಸಂಭವಿಸಿದೆ.");
+                        }
+                        else if (lang == "g") {
+                            alert("ઓટીપી જનરેટ કરતી વખતે ભૂલ આવી");
+                        }
+                        else if (lang == "b") {
+                            alert("ওটিপি উত্পন্ন করার সময় ত্রুটি ঘটেছে");
+                        }
+                        else {
+                            alert("Error occured during generate the OTP");
+                        }
+                    }
+                }
+            });
+        });
+        $("#EnterOTPG").click(function () {
+            $("#EnterOTP2").modal("show");
+            $("#enteredotpId").focus();
+            $("#enteredotpId").val("");
+            $("#EmployeeDOB").val("");
+        });
+
+        $("#Submitbuttonotpmatch").click(function () {
+            if (validateOTP()) {
+                var url = '@Url.Content("~/")' + "Account/OtpMatch";
+                var empid = $.trim($('#EmployeeID').val());
+                var dob = $('#EmployeeDOB').val();
+                var datafrom = 'NewUser'
+                var otp = $('#enteredotpId').val();
+                var key = CryptoJS.enc.Utf8.parse('8080808080808080');
+                var iv = CryptoJS.enc.Utf8.parse('8080808080808080');
+                var encryptedpassword = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(otp), key,
+
+                    { keySize: 128 / 8, iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+                $("#hdnOTP").val(encryptedpassword);
+                var returnval = $("#hdnOTP").val();
+                var lang = localStorage.getItem("language");
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: { enteredotp: returnval, empid: empid, dob: dob, datafr: datafrom },
+                    dataType: "json",
+                    success: function (data) {
+                        $("#EnterOTP2").modal("hide");
+                        if (data == true) {
+                            window.location.href = 'NewUser';
+                            $("#EnterOTP2").modal("hide");
+                        }
+                        else {
+                            //$("#EnterOTP2").modal("hide");
+                            if (lang == "h") {
+                                alert("आपने गलत ओटीपी / जन्म तिथि दर्ज की है");
+                            }
+                            else if (lang == "m") {
+                                alert("आपण चुकीचे ओटीपी / जन्मतारीख प्रविष्ट केली आहे");
+                            }
+                            else if (lang == "k") {
+                                alert("ನೀವು ತಪ್ಪು ಒಟಿಪಿ / ಹುಟ್ಟಿದ ದಿನಾಂಕವನ್ನು ನಮೂದಿಸಿದ್ದೀರಿ");
+                            }
+                            else if (lang == "g") {
+                                alert("તમે ખોટો ઓટીપી / જન્મ તારીખ દાખલ કરી છે");
+                            }
+                            else if (lang == "b") {
+                                alert("আপনি ভুল ওটিপি / জন্ম তারিখ প্রবেশ করেছেন");
+                            }
+                            else {
+                                alert("You have entered wrong OTP/Date Of Birth");
+                            }
+                            // alert("You have entered wrong OTP/Date Of Birth");
+                        }
+                    }
+                });
+            }
+        });
+        $("#loader").hide();
+    });
+
+    function validateOTP() {
+        var lang = localStorage.getItem("language");
+        if ($.trim($("#enteredotpId").val()) == "") {
+            if (lang == "h") {
+                alert("कृप्या ओटीपी दर्ज करे");
+            }
+            else if (lang == "m") {
+                alert("कृपया ओटीपी प्रविष्ट करा");
+            }
+            else if (lang == "k") {
+                alert("ದಯವಿಟ್ಟು ಒಟಿಪಿ ನಮೂದಿಸಿ");
+            }
+            else if (lang == "g") {
+                alert("મહેરબાની કરીને ઓટીપી દાખલ કરો ");
+            }
+            else if (lang == "b") {
+                alert("অনুগ্রহ ওটিপি প্রবেশ করুন");
+            }
+            else {
+                alert("Please enter OTP");
+            }
+            //alert("Please enter OTP");
+            return false;
+        }
+        else if ($.trim($("#EmployeeDOB").val()) == "") {
+            if (lang == "h") {
+                alert("कृप्या जन्म तिथि दर्ज करे");
+            }
+            else if (lang == "m") {
+                alert("कृपया जन्मतारीख प्रविष्ट करा");
+            }
+            else if (lang == "k") {
+                alert("জন্ম তারিখ প্রবেশ করুন");
+            }
+            else if (lang == "g") {
+                alert("મહેરબાની કરીને જન્મ તારીખ દાખલ કરો");
+            }
+            else if (lang == "b") {
+                alert("অনুগ্রহ  জন্ম তারিখ প্রবেশ করুন");
+            }
+            else {
+                alert("Please enter DOB");
+            }
+           // alert("Please enter DOB");
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+</script>
+
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-8">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title " data-trn-key="generateotp">Generate OTP</h3>
+                </div>
+                <center>
+                    <form asp-action="GenerateOTP" method="post" class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" id="hdnOTP" value="" />
+                        <div class="box-body">
+                            <div class="form-group">
+                                <div class="col-sm-1">
+                                </div>
+                                <label for="language" class="col-sm-3 control-label " data-trn-key="employeeid">Employee ID</label>
+                                <div class="col-sm-4">
+                                    <input asp-for="EmployeeID" autocomplete="off" autofocus class="form-control" name="employeeid" new { placeholder="EmployeeID" } />
+                                    <span asp-validation-for="EmployeeID" class="text-danger"></span>
+                                </div>
+                                <div class="col-sm-1">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- /.box-body -->
+                    <div class="box-footer">
+                        <div class="col-lg-12 text-center">
+                            <button type="button" id="btnSubmit" class="btn btn-success "><i class="fa fa-sign-in"></i> Submit</button>
+                            <a href="@Url.Action("Login", "Account")" class="btn btn-warning">
+                                <i class="fa fa-arrow-left"></i> Back
+                            </a>
+                        </div>
+                    </div>
+                    <!-- /.box-footer -->
+
+                </center>
+                <div class="containerCenter">
+                    <div class="row">
+                        <div class="col-lg-1"></div>
+                        <div class="col-lg-11">
+                            <span>
+                                <label class="" data-trn-key="togenerateotp">To generate OTP</label>:-
+                                <br />  <label class="" data-trn-key="generateotpcomment1">
+                                    1)
+                                    Enter your employeeID here and submit.It will prompt for your mobileno verification.
+                                </label>
+                                <br /><label class="" data-trn-key="generateotpcomment2">
+                                    2)
+                                    After click on Yes, system will send OTP to your same mobile no.
+                                </label>
+                                <br /><label class="" data-trn-key="generateotpcomment3">
+                                    3)
+                                    Now click on Enter OTP and enter OTP and DOB if it matches it will redirect you to Password generate page where you can create password.
+                                </label>
+                                <br />&nbsp;
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+        </div>
+    </div>
+
+    <div class="modal fade" id="EnterOTP1" tabindex="-1" role="dialog" aria-labelledby="NUserModalLabelG">
+        <div class="modal-dialog modal-sm" style="background-color:aqua" role="dialog">
+            <div class="modal-content" style="background-color:beige">
+                <div class="modal-header">
+                    <h6 class="modal-title " data-trn-key="otpgenerated" id="NUserModalLabelG" style="color:blue">OTP GENERATED</h6>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group " data-trn-key="generateotpcomment4">
+                        We had sent OTP to your registered Mobile No.
+                    </div>
+                    <br />
+                    <span style="color:blue">
+                        <label class="" data-trn-key="generateotpcomment5">OTP is valid for next 48 hours to generate password.</label>
+                    </span>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success " data-dismiss="modal" id="EnterOTPG"> ENTER OTP</button>
+                    <button type="button" class="btn btn-default " data-dismiss="modal" data-toggle="modal" onclick="location.href='@Url.Action("Login", "Account", new { })';return false;" id="EnterOTPL"> ENTER OTP LATER</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="EnterOTP2" tabindex="-1" role="dialog" aria-labelledby="NUserModalLabel1">
+        <div class="modal-dialog modal-sm" style="background-color:aqua" role="dialog">
+            <div class="modal-content" style="align-content:center;">
+                <div class="modal-header" style="align-content:center">
+                    <br /><br />
+                    <h6 class="modal-title" id="NUserModalLabel1">Enter OTP</h6>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <div class="form-group">
+                            <label asp-for="EnterOTP"></label>
+                        </div>
+
+                        <div class="col-sm-8">
+                            <input asp-for="EnterOTP" type="password" autocomplete="off" class="form-control" id="enteredotpId" />
+                        </div>
+                        <br />
+                        <br />
+                        <br />
+                        <div>
+                            <label asp-for="EmployeeDOB"></label>
+                        </div>
+
+                        <div class="col-sm-8">
+                            <input asp-for="EmployeeDOB" autocomplete="off" class="form-control" />
+                        </div>
+                        <br />
+                        <br />
+                        <br />
+                        <div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="Submitbuttonotpmatch" class="btn btn-success">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="ConfirmMobileNo" tabindex="-1" role="dialog" aria-labelledby="NUserModalLabel">
+        <div class="modal-dialog" role="dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="align-content:center">
+                    <br /><br />
+                    <h4 class="modal-title " data-trn-key="cfrmmobileno" id="NUserModalLabel1" style="color:blue;">Confirm Mobile No.</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group " data-trn-key="generateotpcomment6">
+                        Please confirm your MobileNo as we are sending  OTP to same number.
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-4" style="font-size:Medium">
+                            <label asp-for="MobileNO " class="" data-trn-key="mobileno"></label>
+                        </div>
+                        <div class="col-sm-8">
+                            <input asp-for="MobileNO" style="color:blue" autocomplete="off" readonly class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-group ">  If you want to change your MobileNo ,Change it in SAP HCM</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" id="btnyes" class="btn btn-success " data-trn-key="yes" data-dismiss="modal" data-toggle="modal" data-target="#EnterOTP1"> Yes</button>
+                    <button type="button" class="btn btn-danger " data-trn-key="no" onclick="location.href='@Url.Action("Login", "Account", new {  })';return false;">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+

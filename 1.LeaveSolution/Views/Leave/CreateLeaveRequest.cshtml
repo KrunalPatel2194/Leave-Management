@@ -1,0 +1,1066 @@
+﻿@using Microsoft.AspNetCore.Http;
+@using BlueCollaredLeaveSolution.Core;
+@model BlueCollaredLeaveSolution.Models.LeaveRequestViewModel
+@{
+    ViewData["Title"] = "CreateLeaveRequest";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Scripts{
+    <meta charset="utf-8">
+    <link href="~/Calander/jquery-ui.css" rel="stylesheet" />
+    <link href="~/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/EmpDeptHolidayColor.css?v=34" rel="stylesheet" />
+    <script src="~/Calander/jquery-ui.js"></script>
+    @*For Time picker*@
+    <script src="~/Datepicker/moment.js"></script>
+    <script src="~/Datepicker/bootstrap-datetimepicker.js"></script>
+    <script src="~/JQTable/jquery.dataTables.min.js"></script>
+    <link href="~/JQTable/dataTables.jqueryui.min.css" rel="stylesheet" />
+    <script src="~/js/jquery.unobtrusive-ajax.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#noteId').on('paste keypress', function (event) {
+                var regex = new RegExp("^[0-9a-zA-Z/ -]+$"); //^[a-zA-Z0-9]+$"
+                var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+                if (!regex.test(key)) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
+            $("#LeavelistId > option").each(function () {
+                var ddlval = this.value;
+                var arrddl = ddlval.split('~');
+                $(this).val(arrddl[0]);
+                $(this).attr('qtatype', arrddl[1]);
+                $(this).attr('code',arrddl[2]);
+            });
+            if ($("#btnCLClick").attr("value") != undefined) {
+                var clleave = $("#btnCLClick").attr("value");
+                $("#btnCLClick").attr("value", clleave.split('~')[0]);
+            }
+            if ($("#btnPLClick").attr("value") != undefined) {
+                var plleave = $("#btnPLClick").attr("value");
+                $("#btnPLClick").attr("value", plleave.split('~')[0]);
+            }
+
+            if ($("#btnSLClick").attr("value") != undefined) {
+                var slleave = $("#btnSLClick").attr("value");
+                $("#btnSLClick").attr("value", slleave.split('~')[0]);
+            }
+            var year = (new Date).getFullYear();
+            var attred = localStorage.getItem("attdate");
+            if (attred != null) {
+                localStorage.removeItem('attdate');
+                $("#FromDate").datepicker({
+                    beforeShowDay: setHoliDays,
+                    dateFormat: 'dd/mm/yy',
+                    minDate: '-3M',//this line for disable date from current months before
+                    maxDate: new Date(year, 11, 31),
+                    onSelect: function (selectedDate) {//when click on calander then select date
+                        $(".datepicker").datepicker({ maxDate: '0' });
+                        var todate = $("#ToDate").val();
+                        var LeaveShift = $('input[name=LeaveShift]:checked').val();
+                        if (LeaveShift == "F" || LeaveShift == "S") {
+                            $("#ToDate").val(selectedDate);
+                            $("#FromDate").val(selectedDate);
+                        }
+                        else if (todate != "" && todate < selectedDate) {
+                            $("#FromDate").val("");
+                        }
+                        validateleaves();
+                    }
+                });
+                $("#ToDate").datepicker({
+                    beforeShowDay: setHoliDays,
+                    dateFormat: 'dd/mm/yy',
+                    minDate: '-3M',//this line for disable date from current months before
+                    maxDate: new Date(year, 11, 31),
+                    onSelect: function (selectedDate) {//when click on calander then select date
+                        var LeaveShift = $('input[name=LeaveShift]:checked').val();
+                        if (LeaveShift == "F" || LeaveShift == "S") {
+                            $("#FromDate").val(selectedDate);
+                            $("#ToDate").val(selectedDate);
+                        }
+                        var fromdate = $("#FromDate").val();
+                        var todate = $("#ToDate").val();
+                        var ffdate = new Date(fromdate.split('/')[2] + "-" + fromdate.split('/')[1] + "-" + fromdate.split('/')[0]);
+                        var ttdate = new Date(todate.split('/')[2] + "-" + todate.split('/')[1] + "-" + todate.split('/')[0]);
+                        if (fromdate == "" || ffdate <= ttdate) {
+                        }
+                        else {
+                            $("#ToDate").val("");
+                            return;
+                        }
+                        validateleaves();
+                    }
+                });
+                if (attred.split("/").length > 2) {
+                    $("#FromDate").val(attred);
+                    $("#ToDate").val(attred);
+                }
+                else {
+                    $("#FromDate").val("");
+                    $("#ToDate").val("");
+                }
+            }
+            else {
+                $("#FromDate").datepicker({
+                    beforeShowDay: setHoliDays,
+                    dateFormat: 'dd/mm/yy',
+                    minDate: new Date(year, 0, 1),
+                    maxDate: new Date(year, 11, 31),
+                    onSelect: function (selectedDate) {//when click on calander then select date
+                        $(".datepicker").datepicker({ maxDate: '0' });
+                        var todate = $("#ToDate").val();
+                        var LeaveShift = $('input[name=LeaveShift]:checked').val();
+                        if (validateleaves() == false) {
+                            $("#FromDate").val("");
+                            return false;
+                        }
+                        else if (LeaveShift == "F" || LeaveShift == "S") {
+                            $("#ToDate").val(selectedDate);
+                            $("#FromDate").val(selectedDate);
+                        }
+                       else if (todate != "" && todate < selectedDate) {
+                            $("#FromDate").val("");
+                        }
+                    }
+                });
+                $("#ToDate").datepicker({
+                    beforeShowDay: setHoliDays,
+                    dateFormat: 'dd/mm/yy', minDate: new Date(year, 0, 1),
+                    maxDate: new Date(year, 11, 31),
+                    onSelect: function (selectedDate) {//when click on calander then select date
+                        var LeaveShift = $('input[name=LeaveShift]:checked').val();
+                        if (validateleaves() == false) {
+                            $("#ToDate").val("");
+                            return false;
+                        }
+                        else if (LeaveShift == "F" || LeaveShift == "S") {
+                            $("#FromDate").val(selectedDate);
+                            $("#ToDate").val(selectedDate);
+                        }
+                        var fromdate = $("#FromDate").val();
+                        var todate = $("#ToDate").val();
+                        var ffdate = new Date(fromdate.split('/')[2] + "-" + fromdate.split('/')[1] + "-" + fromdate.split('/')[0]);
+                        var ttdate = new Date(todate.split('/')[2] + "-" + todate.split('/')[1] + "-" + todate.split('/')[0]);
+                        if (fromdate == "" || ffdate <= ttdate) {
+                        }
+                        else {
+                            $("#ToDate").val("");
+                            return;
+                        }
+                    }
+                });
+            }
+            GetHolidayList();
+            $("#LeavelistId").on("change", function () {
+                $("#LeaveCategory").val($(this).find("option:selected").text());
+                var quota = $("#LeavelistId option:selected").attr('qtatype');
+                var code = $("#LeavelistId option:selected").attr('code');
+                if (quota == "NA") {
+                    $("#ValidationID").hide();
+                    $("#Send").attr("disabled", false);
+                }
+                else {
+                    $("#ValidationID").show();
+                    $("#Send").attr("disabled", true);
+                }
+                $('input[name="LeaveShift"]').prop('checked', false);
+                $("#ToDate").val("");
+                $("#FromDate").val("");
+                $("#lblfullday").remove();
+                if (code == "F0" || code == "L1") {
+
+                }
+                else {
+                    var lang = localStorage.getItem("language");
+                    var fullday = "Full Day";
+                    if (lang == "h") {
+                        fullday = "पूरा दिन";
+                    }
+                    else if (lang == "m") {
+                        fullday = "पूर्ण दिवस";
+                    }
+                    else if (lang == "k") {
+                        fullday = "ಪೂರ್ಣ ದಿನ";
+                    }
+                    else if (lang == "g") {
+                        fullday = "આખો દિવસ";
+                    }
+                    else if (lang == "b") {
+                        fullday = "সারা দিন";
+                    }
+                    else {
+                        fullday = "Full Day";
+                    }
+                    var string = '<label id="lblfullday" class="radio-inline"><input asp-for="LeaveShift" type="radio" value="" id="SelectedOrderType1" name="LeaveShift" /><lable class="trn" data-trn-key="fullday">' + fullday +'</lable></label>';
+                    $("#dvleaveshift").prepend(string);
+                }
+            });
+
+             $("#Update").click(function () {
+                var url = '@Url.Content("~/")' + "Leave/UpdateLeaveRequest";
+                var approver = $("#approverId").val();
+                var leaverequestID = $("#LeaveRequestId").val();
+                $.post(url, { Approver: approver, LeaverequestID: leaverequestID }, function (data) {
+                    window.location.href = '@Url.Action("LeaveDashboard","LeaveDashboard")';
+                    $("#loader").hide();
+                });
+            });
+            var changeflag = '@ViewBag.IsChangeLeave';
+            if (changeflag == "Yes") {
+               // alert("change");
+                $("#LeavelistId").attr("disabled", true);
+                $("#FromDate").attr("disabled", true);
+                $("#ToDate").attr("disabled", true);
+                $("#btnCLClick").attr("disabled", true);
+                $("#btnPLClick").attr("disabled", true);
+                $("#btnSLClick").attr("disabled", true);
+                $('input[name=LeaveShift]').attr("disabled", true);
+                $("#uploadfildID").attr("disabled", true);
+                //$("#LeavelistId").attr("disabled", true);
+                // $("#LeavelistId").attr("disabled", true);
+                $("#Update").attr("disabled", true);
+                $("#Update").show();
+                $("#Send").attr("disabled", true);
+                $("#Send").hide();
+                $("#ValidationID").attr("disabled", true);
+                $("#ValidationID").hide();
+            }
+            $(document).on('click', '#myTable tr', function () {
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                }
+                else {
+                    var table = $('#myTable').DataTable();
+                    table.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                }
+            });
+            $("#Approval").click(function () {
+                $("#loader").show();
+                var url = '@Url.Action("GetApproverList", "Leave")';
+                $.getJSON(url, {}, function (data) {
+                    $("#loader").hide();
+                    if (data.length != 0) {
+                        $("#ApproveRequest").modal("show");
+                        var my_columns = [];
+                        var my_item = {};
+                        my_item.data = 'approverId';
+                        my_item.title = 'Approver Id';
+                        my_columns.push(my_item);
+                        var my_item = {};
+                        my_item.data = 'approverName';
+                        my_item.title = 'Approver Name';
+                        my_columns.push(my_item);
+                        var my_item = {};
+                        my_item.data = 'approverMobNo';
+                        my_item.title = 'Approver MobNo';
+                        my_columns.push(my_item);
+                        var my_item = {};
+                        my_item.data = 'approverMailID';
+                        my_item.title = 'Approver MailID';
+                        my_columns.push(my_item);
+                        var my_item = {};
+                        my_item.data = 'hodid';
+                        my_item.title = 'HODID';
+                        my_columns.push(my_item);
+                        var my_item = {};
+                        my_item.data = 'hodName';
+                        my_item.title = 'HODName';
+                        my_columns.push(my_item);
+
+                        var my_item = {};
+                        my_item.data = 'hodMailID';
+                        my_item.title = 'HODMailID';
+                        my_columns.push(my_item);
+
+                        $('#myTable').DataTable({
+                            data: data.data, "destroy": true,
+                            "columns": my_columns,
+                            "ordering": false,
+                            "lengthMenu": [[3, 6, 9],[3, 6, 9]],
+                            'columnDefs': [
+                                { 'visible': false, 'targets': [2, 3, 4, 5, 6] }
+                            ]
+                        });
+                    }
+                });
+            });
+
+            $(document).on("keypress", "#noteId", function () {
+                var regex = new RegExp(/^[a-zA-Z0-9- ]*$/);
+                var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+                if (!regex.test(key)) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+            $(document).on("click","#btnCLClick", function () {
+                var value = $(this).attr('value');
+                $("#LeavelistId").val(value);
+            });
+            $(document).on("click","#btnSLClick", function () {
+                var value = $(this).attr('value');
+                $("#LeavelistId").val(value);
+            });
+            $(document).on("click", "#btnPLClick",function () {
+                var value = $(this).attr('value');
+                $("#LeavelistId").val(value);
+            });
+
+            $('#btnOk').on('click', function () {
+                 var changeflag = '@ViewBag.IsChangeLeave';
+                if (changeflag == "Yes") {
+                    $("#Update").removeAttr("disabled");
+                    $("#Update").show();
+                }
+                $("#ApproveRequest").modal('hide');
+                $("#approverId").removeAttr("readonly", false);
+                    var table = $('#myTable').DataTable();
+                var rows = table.rows('.selected').data();
+                for (var i = 0; i < rows.length; i++) {
+                    $("#approverId").val(rows[i]["approverId"] + "_" + rows[i]["approverName"]);
+                }
+                $("#approverId").attr("readonly", true);
+                var url = '@Url.Content("~/")' + "Leave/SaveAlternateApprover";
+                for (var i = 0; i < rows.length; i++) {
+                    var model = {
+                        ApproverID: rows[i]["approverId"],
+                        ApproverName: rows[i]["approverName"],
+                        ApproverMobNo: rows[i]["approverMobNo"],
+                        ApproverMailID: rows[i]["approverMailID"],
+                        HODID: rows[i]["hodid"],
+                        HODName: rows[i]["hodName"],
+                        HODMailID: rows[i]["hodMailID"],
+                        LeaveRequestId: $("#LeaveRequestId").val()
+                    };
+                }
+                type = 'Post';
+                data = model;
+                if (rows.length > 0 && $("#LeaveRequestId").val() > 0) {
+                    $.post(url, { model: model }, function (data) {
+
+                    });
+                }
+            });
+            $('#Send').click(function (event) {                
+                if (validateleaverequest()) {
+                    $("#loader").show();
+                    $("#LeaveCategory").val($("#LeavelistId").find("option:selected").text());
+                    $("#LeavelistId").attr("disabled", false);
+                    $("#FromDate").attr("disabled", false);
+                    $("#ToDate").attr("disabled", false);
+                    $("#btnCLClick").attr("disabled", false)
+                    $("#btnPLClick").attr("disabled", false)
+                    $("#btnSLClick").attr("disabled", false)
+                    $('input[name=LeaveShift]').attr("disabled", false);
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            });
+
+            $("#ValidationID").click(function () {
+                if (validateleaverequest()) {
+                    $("#loader").show();
+                    var changeflag = '@ViewBag.IsChangeLeave';
+                    var url = '@Url.Content("~/")' + "Leave/ValidationFromSAP"
+                    var LeaveID = $("#LeavelistId").val();
+                    var FromDate = $("#FromDate").val();
+                    var ToDate = $("#ToDate").val();
+                    var LeaveShift = "";
+                    var lang = localStorage.getItem("language");
+                    LeaveShift = $('input[name=LeaveShift]:checked').val();
+                    $.getJSON(url, { LeaveID: LeaveID, FromDate: FromDate, ToDate: ToDate, LeaveShift: LeaveShift }, function (data) {
+
+                        if (data.flag == true) {
+                            if (lang == "h") {
+                                alert("डेटा मान्य है। और कृप्या छुट्टी अनुरोध के लिए भेजना बटन पर क्लिक करें।");
+                            }
+                            else if (lang == "m") {
+                                alert("डेटा वैध आहे.आणि कृपया रजा विनंतीसाठी पाठवा बटणावर क्लिक करा.");
+                            }
+                            else if (lang == "k") {
+                                alert("ಡೇಟಾ ಮಾನ್ಯವಾಗಿದೆ.ಮತ್ತು ರಜೆ ವಿನಂತಿಗಾಗಿ ದಯವಿಟ್ಟು ಕಳುಹಿಸು ಬಟನ್ ಕ್ಲಿಕ್ ಮಾಡಿ.");
+                            }
+                            else if (lang == "g") {
+                                alert("ડેટા માન્ય છે અને કૃપા કરીને રજા વિનંતી માટે મોકલો બટન પર ક્લિક કરો.");
+                            }
+                            else if (lang == "b") {
+                                alert("ডেটা বৈধ। এবং দয়া করে ছুটির অনুরোধের জন্য প্রেরণ বোতামে ক্লিক করুন।");
+                            }
+                            else {
+                                alert("Data is valid.\n Please click on send button for leave request.");
+                            }
+                            //alert("Data is valid.\nPlease click on send button for leave request.");
+                            $("#LeavelistId").attr("disabled", true);
+                            $("#FromDate").attr("disabled", true);
+                            $("#ToDate").attr("disabled", true);
+                            $("#btnCLClick").attr("disabled", true)
+                            $("#btnPLClick").attr("disabled", true)
+                            $("#btnSLClick").attr("disabled", true)
+                            $('input[name=LeaveShift]').attr("disabled", true);
+                            $("#Send").removeAttr("disabled");
+                            $("#Edit").attr("disabled", true);
+                        }
+                        else {
+                            alert(data.valid);
+                            window.location.reload(1);
+                        }
+                        $("#loader").hide();
+                    }).fail(function () {
+                        $("#loader").hide();
+                        alert("error");
+                    });
+                }
+            });
+
+            $('#SelectedOrderType2').on('click', function () {
+                var fromdate = $("#FromDate").val();
+                var todate = $("#ToDate").val();
+                var lang = localStorage.getItem("language");
+                if (fromdate == "" && todate != "") {
+                    $("#FromDate").val(todate);
+                }
+                if (todate == "" && fromdate != "") {
+                    $("#ToDate").val(fromdate);
+                }
+                if (fromdate != "" && todate != "" && fromdate != todate) {
+                    $("#FromDate").val("");
+                    $("#ToDate").val("");
+                    if (lang == "h") {
+                        alert("कृप्या उचित तारीख चुनें");
+                    }
+                    else if (lang == "m") {
+                        alert("कृपया योग्य तारीख निवडा");
+                    }
+                    else if (lang == "k") {
+                        alert("ದಯವಿಟ್ಟು ಸರಿಯಾದ ದಿನಾಂಕ ಆಯ್ಕೆ ಮಾಡಿ");
+                    }
+                    else if (lang == "g") {
+                        alert("મહેરબાની કરીને યોગ્ય તારીખ પસંદ કરો");
+                    }
+                    else if (lang == "b") {
+                        alert("অনুগ্রহ সঠিক তারিখ নির্বাচন করা");
+                    }
+                    else {
+                        alert("Please select proper date");
+                    }
+                   // alert("Please select proper date");
+                    return false;
+                }
+            });
+            $('#SelectedOrderType3').on('click', function () {
+                var fromdate = $("#FromDate").val();
+                var todate = $("#ToDate").val();
+                var lang = localStorage.getItem("language");
+                if (fromdate == "" && todate != "") {
+                    $("#FromDate").val(ttdate);
+                }
+                if (todate == "" && fromdate != "") {
+                    $("#ToDate").val(ffdate);
+                }
+                if (fromdate != todate && fromdate != "" && todate != "") {
+                    $("#FromDate").val("");
+                    $("#ToDate").val("");
+                    if (lang == "h") {
+                       alert("कृप्या उचित तारीख चुनें");
+                    }
+                    else if (lang == "m") {
+                        alert("कृपया योग्य तारीख निवडा");
+                    }
+                    else if (lang == "k") {
+                        alert("ದಯವಿಟ್ಟು ಸರಿಯಾದ ದಿನಾಂಕ ಆಯ್ಕೆ ಮಾಡಿ");
+                    }
+                    else if (lang == "g") {
+                        alert("મહેરબાની કરીને યોગ્ય તારીખ પસંદ કરો");
+                    }
+                    else if (lang == "b") {
+                        alert("অনুগ্রহ সঠিক তারিখ নির্বাচন করা");
+                    }
+                    else {
+                        alert("Please select proper date");
+                    }
+                    //alert("Please select proper date");
+                    return false;
+                }
+            });
+        });
+        var holiDays = new Array();
+
+        function GetHolidayList() {
+            var url = '@Url.Content("~/")' + "Leave/GetHolidayList";
+            $.getJSON(url, {}, function (data) {
+                if (data.length != 0) {
+                    $.each(data, function (i, Holiday) {
+                        var fDateArr = Holiday.holidayDate.split('/');
+                        var tDateArr = Holiday.holidayName.split('/');
+                        var objFdate = new Date(fDateArr[0], fDateArr[1] - 1, fDateArr[2]);
+                        var objTdate = new Date(tDateArr[0], tDateArr[1] - 1, tDateArr[2]);
+                        var diff = Math.abs(objTdate.getTime() - objFdate.getTime());
+                        var diffDays = (diff / (1000 * 60 * 60 * 24)) + 1;
+                        for (var i = 0; i < diffDays; i++) {
+                            var newdate = new Date(objFdate.getTime());
+                            newdate.setDate(newdate.getDate() + i);
+                            var tempArray = [];
+                            tempArray[0] = newdate.getFullYear();
+                            tempArray[1] = newdate.getMonth() + 1;
+                            tempArray[2] = newdate.getDate();
+                            tempArray[3] = Holiday.text;
+                            tempArray[4] = Holiday.text1;
+                            tempArray[5] = Holiday.holidayDate;
+                            holiDays.push(tempArray);
+                        }
+                    });
+                }
+                $("#loader").hide();
+            }).fail(function () {
+                $("#loader").hide();
+                alert("error");
+            });
+        }
+
+        function setHoliDays(date) {
+            var arrayholiday = [];
+            for (i = 0; i < holiDays.length; i++) {
+                arrayholiday.push(holiDays[i][5]);
+                if (date.getFullYear() == holiDays[i][0] && date.getMonth() == holiDays[i][1] - 1 && date.getDate() == holiDays[i][2]) {
+                    if (holiDays[i][4] == "Holidaylist") {
+                        return [false, 'publicholiday', holiDays[i][3]];//here holidays bind dynamically way from sap NonWorkingDay
+                    }
+                    else if (holiDays[i][4] == "Pending") {
+                        return [false, 'ApprovalPending', holiDays[i][3]];
+                    }
+                    else //if (holiDays[i][4] == "Approved") {
+                        return [false, 'Approved', holiDays[i][3]];
+                }
+            }
+            var string = jQuery.datepicker.formatDate('yy/mm/dd', date);
+            return [arrayholiday.indexOf(string) == -1];
+        }
+
+        function GetURLParameter(sParam) {
+            var sPageURL = window.location.search.substring(1);
+            var sURLVariables = sPageURL.split('&');
+            for (var i = 0; i < sURLVariables.length; i++) {
+                var sParameterName = sURLVariables[i].split('=');
+                if (sParameterName[0] == sParam) {
+                    return sParameterName[1];
+                }
+            }
+        }
+
+        function validateleaves() {
+            var quota = $("#LeavelistId option:selected").attr('qtatype');
+            var code = $("#LeavelistId option:selected").attr('code');
+            var lang = localStorage.getItem("language");
+            if ($("#FromDate").val() != "" && $("#ToDate").val() != "") {
+                var fromdate = $("#FromDate").val();
+                var todate = $("#ToDate").val();
+                var ffdate = new Date(fromdate.split('/')[2] + "-" + fromdate.split('/')[1] + "-" + fromdate.split('/')[0]);
+                var ttdate = new Date(todate.split('/')[2] + "-" + todate.split('/')[1] + "-" + todate.split('/')[0]);
+                if (quota != undefined && code != undefined) {
+                    if (code == "L0") {
+                        var diff = new Date(ttdate - ffdate);
+                        var days = diff / 1000 / 60 / 60 / 24;
+                        if (days > 2) {
+                            if (lang == "h") {
+                                alert("इस प्रकार के लिए छुट्टी 3 दिनों से अधिक के लिए लागू नहीं की जा सकती है.");
+                            }
+                            else if (lang == "m") {
+                                alert("या प्रकारची रजा 3 दिवसांपेक्षा जास्त लागू शकत नाही.");
+                            }
+                            else if (lang == "k") {
+                                alert("ಈ ಪ್ರಕಾರಕ್ಕೆ ರಜೆ 3 ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ಕಾಲ ಅನ್ವಯಿಸಲಾಗುವುದಿಲ್ಲ.");
+                            }
+                            else if (lang == "g") {
+                                alert("આ પ્રકારના રજા માટે 3 દિવસથી વધુ સમય માટે અરજી કરી શકાતી નથી.");
+                            }
+                            else if (lang == "b") {
+                                alert("এই ধরণের জন্য ছেড়ে দিন 3 দিনের বেশি আবেদন করা যাবে না.");
+                            }
+                            else {
+                                alert("Leave for this type can not be apply for more than 3 days.");
+                            }
+                            return false;
+                        }
+                    }
+                    else if (code == "W0") {
+                        var diff = new Date(ttdate - ffdate);
+                        var days = diff / 1000 / 60 / 60 / 24;
+                        if (days > 29) {
+                            if (lang == "h") {
+                                alert("इस प्रकार के लिए छुट्टी 30 दिनों से अधिक के लिए लागू नहीं की जा सकती है.");
+                            }
+                            else if (lang == "m") {
+                                alert("या प्रकारची रजा 30 दिवसांपेक्षा जास्त लागू शकत नाही.");
+                            }
+                            else if (lang == "k") {
+                                alert("ಈ ಪ್ರಕಾರಕ್ಕೆ ರಜೆ 30 ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ಕಾಲ ಅನ್ವಯಿಸಲಾಗುವುದಿಲ್ಲ.");
+                            }
+                            else if (lang == "g") {
+                                alert("આ પ્રકારના રજા માટે 30 દિવસથી વધુ સમય માટે અરજી કરી શકાતી નથી.");
+                            }
+                            else if (lang == "b") {
+                                alert("এই ধরণের জন্য ছেড়ে দিন 30 দিনের বেশি আবেদন করা যাবে না.");
+                            }
+                            else {
+                                alert("Leave for this type can not be apply for more than 30 days.");
+                            }
+                            //alert("Leave for this type can not be apply for more than 30 days.");
+                            return false;
+                        }
+                    }
+                    else if (code == "F0") {
+                        var diff = new Date(ttdate - ffdate);
+                        var days = diff / 1000 / 60 / 60 / 24;
+                        if (days > 0) {
+                            if (lang == "h") {
+                                alert("इस प्रकार के लिए छुट्टी 1 दिनों से अधिक के लिए लागू नहीं की जा सकती है.");
+                            }
+                            else if (lang == "m") {
+                                alert("या प्रकारची रजा 1 दिवसांपेक्षा जास्त लागू शकत नाही.");
+                            }
+                            else if (lang == "k") {
+                                alert("ಈ ಪ್ರಕಾರಕ್ಕೆ ರಜೆ 1 ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ಕಾಲ ಅನ್ವಯಿಸಲಾಗುವುದಿಲ್ಲ.");
+                            }
+                            else if (lang == "g") {
+                                alert("આ પ્રકારના રજા માટે 1 દિવસથી વધુ સમય માટે અરજી કરી શકાતી નથી.");
+                            }
+                            else if (lang == "b") {
+                                alert("এই ধরণের জন্য ছেড়ে দিন 1 দিনের বেশি আবেদন করা যাবে না.");
+                            }
+                            else {
+                                alert("Leave for this type can not be apply for more than 1 days.");
+                            }
+                            //alert("Leave for this type can not be apply for more than 1 days.");
+                            return false;
+                        }
+                    }
+                    else if (code == "10") {
+                        var diff = new Date(ttdate - ffdate);
+                        var days = diff / 1000 / 60 / 60 / 24;
+                        if (ffdate > new Date() || ttdate > new Date()) {
+                            if (lang == "h") {
+                                alert("भविष्य की छुट्टी इस छुट्टी के प्रकार के लिए लागू नहीं की जा सकती।");
+                            }
+                            else if (lang == "m") {
+                                alert("या सुट प्रकारासाठी भविष्यातील रजा लागू करता येणार नाही.");
+                            }
+                            else if (lang == "k") {
+                                alert("ಈ ರಜೆ ಪ್ರಕಾರಕ್ಕೆ ಭವಿಷ್ಯದ ರಜೆ ಅನ್ವಯಿಸಲಾಗುವುದಿಲ್ಲ.");
+                            }
+                            else if (lang == "g") {
+                                alert("આ રજા પ્રકાર માટે ફ્યુચર રજા લાગુ કરી શકાતી નથી.");
+                            }
+                            else if (lang == "b") {
+                                alert("ভবিষ্যতের ছুটি এই ছুটির ধরণের জন্য প্রয়োগ করা যাবে না।");
+                            }
+                            else {
+                                alert("Future leave can not be apply for this Leave Type.");
+                            }
+                           // alert("Future leave can not be apply for this Leave Type.");
+                            return false;
+                        }
+                        if (days > 0) {
+                            if (lang == "h") {
+                                alert("इस प्रकार के लिए छुट्टी 1 दिनों से अधिक के लिए लागू नहीं की जा सकती है.");
+                            }
+                            else if (lang == "m") {
+                                alert("या प्रकारची रजा 1 दिवसांपेक्षा जास्त लागू शकत नाही.");
+                            }
+                            else if (lang == "k") {
+                                alert("ಈ ಪ್ರಕಾರಕ್ಕೆ ರಜೆ 1 ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ಕಾಲ ಅನ್ವಯಿಸಲಾಗುವುದಿಲ್ಲ.");
+                            }
+                            else if (lang == "g") {
+                                alert("આ પ્રકારના રજા માટે 1 દિવસથી વધુ સમય માટે અરજી કરી શકાતી નથી.");
+                            }
+                            else if (lang == "b") {
+                                alert("এই ধরণের জন্য ছেড়ে দিন 1 দিনের বেশি আবেদন করা যাবে না.");
+                            }
+                            else {
+                                alert("Leave for this type can not be apply for more than 1 days.");
+                            }
+                            //alert("Leave for this type can not be apply for more than 1 days.");
+                            return false;
+                        }
+                    }
+                }
+            }
+            else {
+                return true;
+            }
+        }
+
+        function ValidateSize(file) {
+            var ext = $(file).val().split('.').pop();
+            var FileSize = file.files[0].size / 1024 / 1024; // in MB
+            var lang = localStorage.getItem("language");
+            if (ext != "pdf") {
+                if (lang == "h") {
+                   alert("कृप्या केवल पीडीएफ फाइलें अपलोड करें");
+                }
+                else if (lang == "m") {
+                   alert("कृपया फक्त पीडीएफ फाईल अपलोड करा");
+                }
+                else if (lang == "k") {
+                   alert("ದಯವಿಟ್ಟು ಪಿಡಿಎಫ್ ಫೈಲ್‌ಗಳನ್ನು ಮಾತ್ರ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ");
+                }
+                else if (lang == "g") {
+                   alert("મહેરબાની કરીને ફક્ત પીડીએફ ફાઇલો અપલોડ કરો");
+                }
+                else if (lang == "b") {
+                   alert("অনুগ্রহ কেবল পিডিএফ ফাইল আপলোড করুন");
+                }
+                else {
+                   alert("Please upload only PDF files");
+                }
+                //alert("Please upload only PDF files");
+                $(file).val(''); //for clearing with Jquery
+                return false;
+            }
+            else if (FileSize > 2) {
+                if (lang == "h") {
+                   alert("फ़ाइल का आकार 2 एमबी से अधिक है।");
+                }
+                else if (lang == "m") {
+                   alert("फाईलचा आकार 2 एमबीपेक्षा जास्त आहे.");
+                }
+                else if (lang == "k") {
+                   alert("ಫೈಲ್ ಗಾತ್ರವು 2 ಎಂಬಿ ಮೀರಿದೆ.");
+                }
+                else if (lang == "g") {
+                   alert("ફાઇલ કદ 2 એમબી કરતા વધુ છે.");
+                }
+                else if (lang == "b") {
+                   alert("ফাইলের আকার 2 এমবি ছাড়িয়ে গেছে।");
+                }
+                else {
+                   alert("File size exceeds 2 MB.");
+                }
+               // alert('File size exceeds 2 MB.');
+                $(file).val(''); //for clearing with Jquery
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        function ApplyAnimation(id) {
+            setTimeout(function () { $("#" + id).removeClass('item-highlight'); }, 5000);
+            setTimeout(function () { $("#" + id).addClass('item-highlight'); }, 0);
+        }
+        function validateleaverequest() {
+            var LeaveID = $("#LeavelistId").val();
+            var FromDate = $("#FromDate").val();;
+            var ToDate = $("#ToDate").val();
+            var approver = $("#approverId").val();
+            var msg = "";
+            var returnmsg = true;
+            var lang = localStorage.getItem("language");
+            if (LeaveID == "" || LeaveID == "0") {
+                if (lang == "h") {
+                    msg += "कृप्या छुट्टी श्रेणी चुनें" + "\n";
+                }
+                else if (lang == "m") {
+                    msg +="कृपया रजा श्रेणी निवडा" + "\n";
+                }
+                else if (lang == "k") {
+                    msg +="ದಯವಿಟ್ಟು ಬಿಟ್ಟು ಹೊರಡು ಗು೦ಪು ಆಯ್ಕೆ ಮಾಡು" + "\n";
+                }
+                else if (lang == "g") {
+                    msg +="મહેરબાની કરીને રજા વર્ગ પસંદ કરો" + "\n";
+                }
+                else if (lang == "b") {
+                    msg += "অনুগ্রহ অনুমতি বিভাগ নির্বাচন করা" + "\n";
+                }
+                else {
+                    msg +="Please select leave cateogory." + "\n";
+                }
+                //msg += "Please select leave cateogory" + "\n";
+                ApplyAnimation("LeavelistId");
+                returnmsg = false;
+            }
+            if (FromDate == "") {
+                if (lang == "h") {
+                    msg += "कृप्या दिनांक से दर्ज करे" + "\n";
+                }
+                else if (lang == "m") {
+                    msg += "कृपया या तारखेपासून प्रविष्ट करा" + "\n";
+                }
+                else if (lang == "k") {
+                    msg += "ದಯವಿಟ್ಟು ಯಿ೦ದ ದಿನಾ೦ಕ ನಮೂದಿಸಿ" + "\n";
+                }
+                else if (lang == "g") {
+                    msg += "મહેરબાની કરીને માંચી ખજૂર દાખલ કરો " + "\n";
+                }
+                else if (lang == "b") {
+                    msg += "অনুগ্রহ  থেকে তারিখ প্রবেশ করান" + "\n";
+                }
+                else {
+                    msg += "Please enter from date" + "\n";
+                }
+                //msg += "Please enter from date" + "\n";
+                ApplyAnimation("FromDate");
+                returnmsg = false;
+            }
+            if (ToDate == "") {
+                if (lang == "h") {
+                    msg += "कृप्या दिनांक तक दर्ज करे" + "\n";
+                }
+                else if (lang == "m") {
+                    msg += "कृपया या तारखेपर्यंत प्रविष्ट करा" + "\n";
+                }
+                else if (lang == "k") {
+                    msg += "ದಯವಿಟ್ಟು ಯಿ೦ದ ದಿನಾ೦ಕ ನಮೂದಿಸಿ" + "\n";
+                }
+                else if (lang == "g") {
+                    msg += "મહેરબાની કરીને તરફ ખજૂર દાખલ કરો " + "\n";
+                }
+                else if (lang == "b") {
+                    msg += "অনুগ্রহ  তারিখে প্রবেশ করুন" + "\n";
+                }
+                else {
+                    msg += "Please enter from date" + "\n";
+                }
+                //msg += "Please enter to date" + "\n";
+                ApplyAnimation("ToDate");
+                returnmsg = false;
+            }
+            if (approver == "") {
+                if (lang == "h") {
+                    msg += "कृप्या मैनेजर चुनें" + "\n";
+                }
+                else if (lang == "m") {
+                    msg += "कृपया व्यवस्थापक निवडा" + "\n";
+                }
+                else if (lang == "k") {
+                    msg += "ದಯವಿಟ್ಟು ವ್ಯವಸ್ಥಾಪಕಿ ಆಯ್ಕೆ ಮಾಡಿ" + "\n";
+                }
+                else if (lang == "g") {
+                    msg += "મહેરબાની કરીને મેનેજર પસંદ કરો" + "\n";
+                }
+                else if (lang == "b") {
+                    msg += "অনুগ্রহ ম্যানেজার নির্বাচন করা" + "\n";
+                }
+                else {
+                    msg += "Please select approver" + "\n";
+                }
+               // msg += "Please select approver" + "\n";
+                ApplyAnimation("approverId");
+                returnmsg = false;
+            }
+            if ($("input:radio[name='LeaveShift']").is(":checked") == false) {
+                if (lang == "h") {
+                    msg += "कृप्या छुट्टी का प्रकार चुनें" + "\n";
+                }
+                else if (lang == "m") {
+                    msg += "कृपया रजा प्रकार निवडा" + "\n";
+                }
+                else if (lang == "k") {
+                    msg += "ದಯವಿಟ್ಟು ರಜೆ ಛಾಪಿಸು ಆಯ್ಕೆ ಮಾಡಿ" + "\n";
+                }
+                else if (lang == "g") {
+                    msg += "મહેરબાની કરીને રજા પ્રકાર પસંદ કરો" + "\n";
+                }
+                else if (lang == "b") {
+                    msg += "অনুগ্রহ ছুটি নমুনা হত্তয়া নির্বাচন করা" + "\n";
+                }
+                else {
+                    msg += "Please select leave type" + "\n";
+                }
+                //msg += "Please select leave type" + "\n";
+                ApplyAnimation("dvleaveshift");
+                returnmsg = false;
+            }
+            if (returnmsg == false) {
+                alert(msg);
+            }
+            return returnmsg;
+        }
+    </script>
+}
+@*For Popup*@
+<form method="post" class="form-horizontal" id="demo" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <section class="content">
+        <div class="box box-primary">
+            <div class="box-header">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h3 class="box-title trn" data-trn-key="createleaverequest">
+                            Create Leave Request
+                        </h3>
+                    </div>
+                    <div class="col-lg-4 item-highlight">
+                        <span class="pull-right trn" data-trn-key="mandatoryfields" style="color: red;font-size: 15px;"> * indicates mandatory fields.</span>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" value="@Model.LeaveRequestId" name="LeaveRequestId" id="LeaveRequestId" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="box-body">
+                <div class="form-group" style="display:none">
+                    <div class="col-lg-3">
+                        <label class="trn" data-trn-key="employeename">Employee Name:</label>
+                        <span asp-for="EmployeeName">@Model.EmployeeName</span>
+                    </div>
+                    <div class="col-lg-3">
+                        <label class="trn" data-trn-key="persnolarea">PA</label>:
+                        <span asp-for="PA">@Model.PA</span>
+                    </div>
+                    <div class="col-lg-3">
+                        <label class="trn" data-trn-key="personalsubarea">PSA</label>:
+                        <span asp-for="PSA">@Model.PSA</span>
+                    </div>
+                </div>
+                @if (@Context.Session.GetString(Constant.KISOK) == "yes")
+                {
+                    <div class="form-group">
+                        <div class="col-lg-12">
+                            @foreach (var list in Model.Leavelist)
+                            {
+
+                                @if (list.Text.Contains("Casual Leave"))
+                                {
+                                    <a class="trn btn btn-lg" style="color: white;background-color: #307ee2;" id="btnCLClick" value="@list.Value">@list.Text</a>
+                                }
+                                else if (list.Text.Contains("Privilege Leave"))
+                                {
+                                    <a class="trn  btn btn-lg" id="btnPLClick" style="color: white;background-color: #307ee2;" value="@list.Value">@list.Text</a>
+                                }
+                                else if (list.Text.Contains("Sick Leave"))
+                                {
+                                    <a class="trn btn   btn-lg" style="color: white;background-color: #307ee2;" id="btnSLClick" value="@list.Value">@list.Text</a>
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+                <div class="form-group">
+                    <div class="col-lg-3">
+                        <label asp-for="LeaveCategory" class="trn" data-trn-key="leavecategory"></label> <span class="mandatory">*</span>
+                        <select asp-for="LeavelistId" class="form-control" asp-items="@Model.Leavelist"></select>
+                        <input type="hidden" id="LeaveCategory" name="LeaveCategory" value="" />
+                        <span asp-validation-for="LeavelistId" class="text-danger"></span>
+                    </div>
+                    <div class="col-lg-3 col-md-3">
+                        <label asp-for="LeaveType" class="trn" data-trn-key="leavetype"></label>  <span class="mandatory">*</span>
+                        <div id="dvleaveshift" name="dvleaveshift" class="form-check-inline" style="border: 1px solid white;">
+                            <label id="lblfullday" class="radio-inline">
+                                <input asp-for="LeaveShift" type="radio" value="" id="SelectedOrderType1" name="LeaveShift" /><lable class="trn" data-trn-key="fullday">Full Day</lable>
+                            </label>
+                            <label class="radio-inline ">
+                                <input asp-for="LeaveShift" type="radio" value="F" id="SelectedOrderType2" name="LeaveShift" /><lable class="trn" data-trn-key="firsthalf">First Half</lable><br />
+                            </label>
+                            <label class="radio-inline ">
+                                <input asp-for="LeaveShift" type="radio" value="S" id="SelectedOrderType3" name="LeaveShift" /><lable class="trn" data-trn-key="secondhalf">Second Half</lable><br />
+                            </label>
+                            <br />
+                            <span asp-validation-for="LeaveShift" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <label asp-for="FromDate" class="trn" data-trn-key="fromdate"></label>  <span class="mandatory">*</span>
+                        <input type="text" id="FromDate" class="form-control" readonly="readonly" autocomplete="off" asp-for="FromDate" new { placeholder="DD/MM/YYYY" } />
+                        <span asp-validation-for="FromDate" class="text-danger" data-trn-key="leavecategoryValidation"></span>
+                    </div>
+                    <div class="col-lg-3">
+                        <label asp-for="ToDate" class="trn" data-trn-key="todate"></label>  <span class="mandatory">*</span>
+                        <input type="text" id="ToDate" class="form-control" readonly="readonly" autocomplete="off" asp-for="ToDate" new { placeholder="DD/MM/YYYY" } />
+                        <span asp-validation-for="ToDate" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-lg-3">
+                        <label asp-for="ApproverName" class="trn" data-trn-key="approver"></label>  <span class="mandatory">*</span>
+                        <input asp-for="ApproverName" autocomplete="off" class="form-control" style="margin-bottom:5px;" readonly id="approverId" />
+                        <p class="help-block">
+                            <a href="#" style="color:blue;" id="Approval" class="trn" data-trn-key="clickhere">Click Here to change approver</a>
+
+                        </p>
+                        <span asp-validation-for="ApproverName" class="text-danger"></span>
+                    </div>
+                    @if (@Context.Session.GetString(Constant.KISOK) != "yes")
+                    {
+                        <div class="col-lg-3">
+                            <label class="trn" data-trn-key="documentupload">Document Upload</label>
+                            <input type="file" onchange="ValidateSize(this)" autocomplete="off" name="FileToUpload" asp-for="FileToUpload" class="form-control" id="uploadfildID">
+                            <p class="help-block" style="color:red">
+                                <span class="trn" data-trn-key="onlyuploadPDFfile">Only upload PDF file</span>
+                            </p>
+                        </div>
+                    }
+                    <div class="col-lg-3">
+                        <label asp-for="Remarks" class="trn" data-trn-key="note"></label>
+                        <TEXTAREA type="text" class="form-control" multiple="text" id="noteId" maxlength="50" asp-for="Remarks" new { placeholder="Note" }></TEXTAREA>
+                        <span asp-validation-for="Remarks" class="text-danger"></span>
+                    </div>
+                    <div class="col-lg-3">
+                    </div>
+                </div>
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer ">
+                <div class="col-lg-12 text-center">
+                    <div class="row">
+                        <button type="button" class="btn btn-warning btn-lg" id="ValidationID">
+                            <span class="glyphicon glyphicon-exclamation-sign"></span>
+                            <span class=" trn" data-trn-key="btnValidation">Validation</span>
+                        </button>
+                        <button type="submit" class="btn btn-success btn-lg" disabled id="Send" formaction="@Url.Action("CreateLeaveRequest","Leave")">
+                            <span class="glyphicon glyphicon-send "></span>
+                            <span data-trn-key="btnSend" class="trn">Send</span>
+                        </button>
+                        <button type="button" class="btn btn-success btn-lg" disabled style="display:none" id="Update">
+                            <span class="glyphicon glyphicon-edit "></span>
+                            <span class="trn" data-trn-key="btnEdit"> Update</span>
+                        </button>
+                        <button type="reset" class="btn btn-primary btn-lg" onclick="window.location.href = window.location.href;">
+                            <span class="glyphicon glyphicon-refresh"></span>
+                            <span class="trn" data-trn-key="btnReset">Reset</span>
+                        </button>
+                        <a class="btn btn-danger btn-lg" href="@Url.Action("LeaveDashboard","LeaveDashboard")">
+                            <span class="glyphicon glyphicon-remove"></span>
+                            <span class=" trn" data-trn-key="cancelbutton">Cancel</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="ApproveRequest">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title trn" data-trn-key="pleaseEnterApproverID" id="NUserModalLabel">Please select Approver ID from the below list and Click on OK</h4>
+
+                </div>
+                <div class="modal-body">
+                    <div class="text-center" id="Centerbody">
+                        <section class="content">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="box box-primary BorderBottom-blue">
+                                        <div class="box-body table-responsive">
+                                            <table id="myTable" class="table table-hover" style="width:100%"></table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary trn" data-trn-key="btnok" data-dismiss="modal" data-toggle="modal" id="btnOk">Ok</button>
+                    <button type="button" class="btn btn-warning trn" data-trn-key="cancelbutton" data-dismiss="modal" data-toggle="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

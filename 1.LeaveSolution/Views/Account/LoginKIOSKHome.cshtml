@@ -1,0 +1,341 @@
+﻿@model BlueCollaredLeaveSolution.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Hello";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="~/js/aes.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#loader").show();
+        $("#UserId").attr("autocomplete", "off");
+        var lang = localStorage.getItem("language");
+        if (lang != undefined) {
+            if (lang == "h") {
+                $("#rdbtnhindi").attr("checked", true);
+            }
+            else if (lang == "m") {
+                $("#rdbtnmarathi").attr("checked", true);
+            }
+            else if (lang == "k") {
+                $("#rdbtnkannad").attr("checked", true);
+            }
+            else if (lang == "g") {
+                $("#rdbtngujarati").attr("checked", true);
+            }
+            else if (lang == "b") {
+                $("#rdbtnbengali").attr("checked", true);
+            }
+            else {
+                $("#rdbtnenglish").attr("checked", true);
+            }
+        }
+        else {
+            $("#rdbtnenglish").attr("checked", true);
+        }
+        $("#btnLoginSubmitKiosk").click(function () {
+            $("#UserId").val($.trim($("#UserId").val()));
+            $("#Password").val($.trim($("#Password").val()));
+            if ($.trim($("#UserId").val()) == "") {
+                if (lang == "h") {
+                    alert("कृप्या उपयोगकर्ता नाम दर्ज करें");
+                }
+                else if (lang == "m") {
+                    alert("कृपया वापरकर्त्याचे नाव प्रविष्ट करा");
+                }
+                else if (lang == "k") {
+                    alert("ದಯವಿಟ್ಟು ಬಳಕೆದಾರರ ಹೆಸರನ್ನು ನಮೂದಿಸಿ");
+                }
+                else if (lang == "g") {
+                    alert("મહેરબાની કરીને વપરાશકર્તા નામ દાખલ કરો");
+                }
+                else if (lang == "b") {
+                    alert("অনুগ্রহ ব্যবহারকারীর নাম লিখুন");
+                }
+                else {
+                    alert("Please enter user name");
+                }
+                //alert("Please enter user name");
+                $("#UserId").focus();
+                return false
+            }
+            else if ($.trim($("#Password").val()) == "") {
+                if (lang == "h") {
+                    alert("कृप्या पासवर्ड दर्ज करें");
+                }
+                else if (lang == "m") {
+                    alert("कृपया संकेतशब्द प्रविष्ट करा");
+                }
+                else if (lang == "k") {
+                    alert("ದಯವಿಟ್ಟು ಪಾಸ್ವರ್ಡ್ ನಮೂದಿಸಿ");
+                }
+                else if (lang == "g") {
+                    alert("મહેરબાની કરીને ખાનગી શબ્દ દાખલ કરો");
+                }
+                else if (lang == "b") {
+                    alert("অনুগ্রহ পাসওয়ার্ড লিখুন");
+                }
+                else {
+                    alert("Please enter password");
+                }
+                //alert("Please enter password");
+                $("#Password").focus();
+                return false;
+            }
+            $("#loader").show();
+            var txtpassword = $('#Password').val();
+            var key = CryptoJS.enc.Utf8.parse('8080808080808080');
+            var iv = CryptoJS.enc.Utf8.parse('8080808080808080');
+
+            var encryptedpassword = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(txtpassword), key,
+
+                { keySize: 128 / 8, iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+
+            $('#Password').val(encryptedpassword);
+            var language = $('input[name=Login]:checked').val();
+            if (typeof (Storage) !== "undefined") {
+                localStorage.setItem("language", language);
+            } else {
+                if (lang == "h") {
+                    alert("क्षमा करें, आपका वेब ब्राउज़र सहारा का संचयन नहीं करता है ...");
+                }
+                else if (lang == "m") {
+                    alert("क्षमस्व, आपला वेब ब्राउझर संचयनास समर्थन देत नाही ..");
+                }
+                else if (lang == "k") {
+                    alert("ಕ್ಷಮಿಸಿ, ನಿಮ್ಮ ಬ್ರೌಸರ್ ವೆಬ್ ಸಂಗ್ರಹಣೆಯನ್ನು ಮಾಡುವುದಿಲ್ಲ ...");
+                }
+                else if (lang == "g") {
+                    alert("માફ કરશો, તમારું વેબ બ્રાઉઝર સ્ટોરેજ કરતું નથી..");
+                }
+                else if (lang == "b") {
+                    alert("দুঃখিত, আপনার ব্রাউজারটি ওয়েব স্টোরেজ করে না ...");
+                }
+                else {
+                    alert("Sorry, your browser does not support Web Storage...");
+                }
+                //alert("Sorry, your browser does not support Web Storage...");
+                return false;
+            }
+        });
+        $("input[name=Login]").change(function () {
+            $("#loader").show();
+            var language = $('input[name=Login]:checked').val();
+            if (typeof (Storage) !== "undefined") {
+                localStorage.setItem("language", language);
+            } else {
+                if (lang == "h") {
+                    alert("क्षमा करें, आपका वेब ब्राउज़र सहारा का संचयन नहीं करता है ...");
+                }
+                else if (lang == "m") {
+                    alert("क्षमस्व, आपला वेब ब्राउझर संचयनास समर्थन देत नाही ..");
+                }
+                else if (lang == "k") {
+                    alert("ಕ್ಷಮಿಸಿ, ನಿಮ್ಮ ಬ್ರೌಸರ್ ವೆಬ್ ಸಂಗ್ರಹಣೆಯನ್ನು ಮಾಡುವುದಿಲ್ಲ ...");
+                }
+                else if (lang == "g") {
+                    alert("માફ કરશો, તમારું વેબ બ્રાઉઝર સ્ટોરેજ કરતું નથી..");
+                }
+                else if (lang == "b") {
+                    alert("দুঃখিত, আপনার ব্রাউজারটি ওয়েব স্টোরেজ করে না ...");
+                }
+                else {
+                    alert("Sorry, your browser does not support Web Storage...");
+                }
+                //alert("Sorry, your browser does not support Web Storage...");
+                return false;
+            }
+            window.location.reload(1);
+        });
+        $("#Submitbuttonotp").click(function () {
+            $("#loader").show();
+            var url = '@Url.Content("~/")' + "Account/OtpMatch";
+            var otp = $('#EnterOTP').val();
+              var empid = $('#EmployeeID').val();
+            var dob = $('#EmployeeDOB').val();
+            $.getJSON(url, { enteredotp: otp, empid: empid,dob:dob }, function (data) {
+                if (data == 1) {
+
+                    window.location.href = 'Account/NewUser';
+                    $("#EnterOTPM").modal("dispose");
+                }
+
+                else if (data==2) {
+                    window.location.href = 'Account/GenerateOTP';
+                    $("#EnterOTPM").modal("dispose");
+                }
+                else if (data == 0) {
+                    if (lang == "h") {
+                        alert("ओह !,दर्ज किए गए क्रेडेंशियल का मिलान नहीं हुआ");
+                    }
+                    else if (lang == "m") {
+                        alert("प्रविष्ट केलेली क्रेडेन्शियल्स जुळली नाहीत");
+                    }
+                    else if (lang == "k") {
+                        alert("ಓಹ್!, ಪ್ರವೇಶಿಸಿದ ರುಜುವಾತುಗಳು ಹೊಂದಿಕೆಯಾಗಲಿಲ್ಲ");
+                    }
+                    else if (lang == "g") {
+                        alert("ઓપ્સ !,દાખલ કરેલ ઓળખપત્રો મેળ ખાતા નથી");
+                    }
+                    else if (lang == "b") {
+                        alert("ওফ !, প্রবেশের শংসাপত্রগুলি মেলে না");
+                    }
+                    else {
+                        alert("Oops!,Entered Credentials Did Not Match");
+                    }
+
+                    //alert("Oops!, Entered Credentials Did Not Match");
+                    $("#EnterOTPM").modal("dispose");
+                    $("#EnterOTPM").modal("show");
+                }
+                $("#loader").hide();
+            }).fail(function () {
+                $("#loader").hide();
+                alert("error");
+            });
+        });
+        $("#loader").hide();
+    });
+</script>
+<div style="text-align:center;">
+    <img src="~/Images/tata-motors.png" />
+</div>
+@Html.HiddenFor(item => Model.UserName)
+<section class="content">
+    <div class="row">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-8">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title trn" data-trn-key="enterlogincredentials">Enter Login Credentials</h3>
+                </div>
+
+                <form class="form-horizontal" asp-action="Login" method="post">
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="box-body btn-lg">
+                        <div class="form-group">
+                            <label for="language" class="col-sm-3 control-label trn" data-trn-key="selectlanguage">Select Language</label>
+                            <div class="col-sm-9">
+                                <label class="radio-inline"><input type="radio" value="e" id="rdbtnenglish" name="Login" checked>English</label>
+                                <label class="radio-inline"><input type="radio" value="h" id="rdbtnhindi" name="Login">हिंदी</label>
+                                <label class="radio-inline"><input type="radio" value="m" id="rdbtnmarathi" name="Login">मराठी</label>
+                                <label class="radio-inline"><input type="radio" value="k" id="rdbtnkannad" name="Login">ಕನ್ನಡ</label>
+                                <label class="radio-inline"><input type="radio" value="g" id="rdbtngujarati" name="Login">ગુજરાતી</label>
+                                <label class="radio-inline"><input type="radio" value="b" id="rdbtnbengali" name="Login">বাঙালি</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="language" class="col-sm-3 control-label trn" data-trn-key="userid">User ID</label>
+                            <div class="col-sm-4 has-feedback">
+                                <input asp-for="UserId" autocomplete="off" id="UserId" autofocus title="User ID is your Employee ID" class="form-control" placeholder="e.g. 123456" />
+                                <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+                                <span asp-validation-for="UserId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+
+                            <label for="language" class="col-sm-3 control-label trn" data-trn-key="password">Password</label>
+                            <div class="col-sm-4 has-feedback">
+                                <input asp-for="Password" autocomplete="off" class="form-control" type="password" placeholder="Password" />
+                                <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="box-footer" style="text-align:center;">
+                        <button type="submit" name="btnLoginSubmit" value="KIOSK" class="btn btn-success btn-lg " id="btnLoginSubmitKiosk"> <i class="fa fa-sign-in" aria-hidden="true"> </i> &nbsp;<span data-trn-key="loginbutton" class="trn"> Login </span></button>
+                        <a href="@Url.Action("KIOSKHome","Account",new { datafr="NewUser"})" class="btn btn-facebook btn-lg"> <i class="fa fa-user" aria-hidden="true"></i> <span class="trn" data-trn-key="newuser">New User</span></a>
+                        <a href="@Url.Action("KIOSKHome","Account",new { datafr="Reset"})" class="btn  btn-google btn-lg"> <i class="fa fa-lock" aria-hidden="true"></i>  <span class="trn" data-trn-key="forgotpwdloginKIOSK">Forgot/Reset Password</span></a>
+                        <a href="@Url.Action("LoginHome", "Account")" class="btn btn-warning btn-lg"><i class="fa fa-close" aria-hidden="true"></i> <span class=" trn" data-trn-key="cancelbutton"> Cancel</span></a>
+                    </div>
+                    <div class="form-group" style="text-align:center;">
+                        <div class="row">
+                            <div class="col-sm-2">
+                            </div>
+                            <div class="col-sm-8">
+                                <p><label class="trn" data-trn-key="logincomment">If you are very first time user then click on New user to generate Password.</label></p>
+                            </div>
+                            <div class="col-sm-2">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">
+                            </div>
+                            <div class="col-sm-8">
+                                <br />
+                            </div>
+                            <div class="col-sm-2">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-2">
+        </div>
+    </div>
+</section>
+@*  modal for new user*@
+<div class="modal fade" id="AskOTP" tabindex="-1" role="dialog" aria-labelledby="NUserModalLabel">
+    <div class="modal-dialog modal-sm" style="background-color:aqua" role="dialog">
+        <div class="modal-content" style="background-color:beige">
+            <div class="modal-header">
+                <h4 class="modal-title trn" data-trn-key="newuser" id="NUserModalLabel">New User</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body" style="font-size:medium">
+                <label class="trn" data-trn-key="doyouhaveotp">Do you have OTP?</label>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-default trn" data-trn-key="yes" data-dismiss="modal" data-toggle="modal" data-target="#EnterOTPM" id="submitAssessment"> Yes</button>
+                <button type="button" class="btn btn-default trn" data-trn-key="no" onclick="location.href='@Url.Action("GenerateOTP", "Account", new {  })';return false;">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+@*modal for enter otp*@
+<div class="modal fade" id="EnterOTPM" tabindex="-1" role="dialog" aria-labelledby="NUserModalLabel1">
+    <div class="modal-dialog modal-sm" style="background-color:aqua" role="dialog">
+        <div class="modal-content" style="background-color:beige;align-content:center">
+            <div class="modal-header" style="align-content:center">
+                <br /><br />
+                <h6 class="modal-title" id="NUserModalLabel1" style="color:blue;font-size:medium">Enter OTP</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body" style="font-size:small">
+                <div class="form-group row">
+                    <div>
+                        @*<span class="glyphicon glyphicon-hand-right"></span>*@
+                        <label asp-for="EmployeeID" class="trn" data-trn-key="employeeid"></label>
+                    </div>
+                    <div class="col-sm-8">
+                        <input asp-for="EmployeeID" autocomplete="off" class="form-control" a />
+                    </div>
+                    <br /><br />
+                    <div>
+                        @*<span class="glyphicon glyphicon-hand-right"></span>*@
+                        <label asp-for="EnterOTP" class="trn" data-trn-key="enterotp"></label>
+                    </div>
+                    <div class="col-sm-8">
+                        <input asp-for="EnterOTP" autocomplete="off" class="form-control" />
+
+                    </div>
+                    <br /><br />
+                    <div>
+                        <label asp-for="EmployeeDOB" class="trn" data-trn-key="employeeDOB"></label>
+                    </div>
+                    <div class="col-sm-8">
+                        <input asp-for="EmployeeDOB" autocomplete="off" class="form-control" type="date" />
+                    </div>
+                    <br /><br />
+                    <div style="align-self:center">
+                        <button type="submit" id="Submitbuttonotp" style="align-self:center;margin-left:100px" class="btn btn-default  trn" data-trn-key="submit">Submit</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

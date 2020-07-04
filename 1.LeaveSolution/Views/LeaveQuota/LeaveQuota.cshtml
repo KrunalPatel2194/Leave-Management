@@ -1,0 +1,69 @@
+﻿@model BlueCollaredLeaveSolution.Models.LeaveQuotaModelViewModel
+@using NonFactors.Mvc.Grid;
+@{
+    ViewData["Title"] = "LeaveQuota";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Scripts{
+    <script src="~/js/jquery.dataTables.min.js"></script>
+    <link href="~/JQTable/jquery-ui.css" rel="stylesheet" />
+    <link href="~/JQTable/dataTables.jqueryui.min.css" rel="stylesheet" />
+    <link href="~/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+}
+<style>
+    #quotaTable {
+        border-bottom: 1px solid #dee2e6;
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $("#loader").show();
+        $("#quotaTable").DataTable({
+            "processing": true, // for show progress bar
+            // "serverSide": true, // for process server side
+            "filter": true, // this is for disable filter (search box)
+            "orderMulti": false, // for disable multiple column at once
+            "scrollCollapse": true,
+            //"scrollY": 350,
+        });
+        $("#loader").hide();
+    });
+</script>
+
+<section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-primary BorderBottom-blue">
+                <div class="box-header">
+                    <h3 class="box-title trn" data-trn-key="leavequota">
+                        Leave Quota
+                    </h3>
+                </div>
+                <div class="box-body table-responsive">
+                    <table id="quotaTable" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="trn" data-trn-key="leavecategory">Leave Category</th>
+                                <th class="trn" data-trn-key="leavequota">Leave Quota</th>
+                                <th class="trn" data-trn-key="balanceleaveQ">Balance Leave</th>
+                                <th class="trn" data-trn-key="approvedLeaves">Approved Leaves</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var items in Model.LeaveQuota)
+                            {
+                                <tr>
+                                    <td>@items.LeaveCategory</td>
+                                    <td>@items.Quota</td>
+                                    <td>@items.BalanceLeave</td>                                    
+                                    <td>@items.TotalLeaves</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

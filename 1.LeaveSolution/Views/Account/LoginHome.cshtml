@@ -1,0 +1,51 @@
+﻿@model BlueCollaredLeaveSolution.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        @*if ((window.fullScreen) ||
+            (window.innerWidth == screen.width && window.innerHeight == screen.height)) {
+            window.location.href = '@Url.Content("~/")' + "Account/LoginKIOSKHome";
+        }*@        
+    });
+
+</script>
+<section class="content">
+    <div class="row">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-8">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h2 class="box-title trn" data-trn-key="loginoption">Type of system</h2>
+                </div>
+                <center>
+                    <form class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="box-body">                          
+                            <div class="form-group">
+
+                                <label for="System" class="col-sm-3 control-label trn" data-trn-key="typeofsystem"></label>
+                                <div class="col-sm-2">
+                                    <button onclick="location.href ='@Url.Action("LoginKIOSKHome","Account")'" type="button" class="btn btn-google btn-lg"><i class="fa fa-list-alt"></i>  KIOSK</button>
+                                </div>
+                                <div class="col-sm-3">
+                                    <button onclick="location.href ='@Url.Action("Login","Account")'" type="button" class="btn btn-info btn-lg"><i class="fa fa-laptop"></i>  WITHOUT KIOSK (Mobile/Web Browser)</button>
+                                </div>
+                                <div class="col-sm-1">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </center>
+            </div>
+        </div>
+        <div class="col-md-2">
+        </div>
+    </div>
+</section>
+

@@ -1,0 +1,343 @@
+﻿@model BlueCollaredLeaveSolution.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Scripts{
+    <meta charset="utf-8">
+    <link href="~/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <script src="~/js/jquery.inputmask.js"></script>
+    <script src="~/js/jquery.inputmask.date.extensions.js"></script>
+    <script src="~/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+}
+<style>
+    .employeeidlbl {
+        float: left;
+        margin-top: 5PX;
+        font-size: 18px;
+    }
+    .datepicker,
+    .table-condensed {
+        width: 300px;
+        height: 300px;
+    }
+</style>
+<script type="text/javascript">
+    function scanmifarecard(that) {
+        var id = $.trim($(that).val());
+        scaninner(id);
+    }
+
+    function scaninner(Mifareid) {
+        $("#loader").show();
+        var url = '@Url.Action("ValidateMifare", "Account")';
+        var lang = localStorage.getItem("language");
+        $.getJSON(url, { Mifareid: Mifareid }, function (data) {
+            $("#loader").hide();
+            if (data.result == true) {
+                $('#lblempid').text(data.msg);
+                $("#txtscancard").attr('readonly', true);
+                $('#lblemp').css('display', 'inline-block');
+                $('#lblempid').css('display', 'inline-block');
+                $("#btnSubmit").css('display', 'inline-block');
+            }
+            else if (data.result == false) {
+                if (data.msg == null) {
+                    if (lang == "h") {
+                        alert("गलत..कृप्या कुछ देर बाद प्रयास करें..!");
+                    }
+                    else if (lang == "m") {
+                        alert("चूक.. कृपया थोड्या वेळाने प्रयत्न करा ..!");
+                    }
+                    else if (lang == "k") {
+                        alert("ದಯವಿಟ್ಟು ಬಳಕೆದಾರರ ಹೆಸರನ್ನು ನಮೂದಿಸಿ");
+                    }
+                    else if (lang == "g") {
+                        alert("ભૂલ ..મહેરબાની કરીને થોડા સમય પછી પ્રયત્ન કરો ..!");
+                    }
+                    else if (lang == "b") {
+                        alert("ভুল..অনুগ্রহ কিছুক্ষণ পরে চেষ্টা করুন ..!");
+                    }
+                    else {
+                        alert("Error..please try after some time..!");
+                    }
+                    //alert("Error..please try after some time..!");
+                    window.location.href = '@Url.Action("LoginKIOSKHome", "Account")';
+                }
+                else if (data.msg == "Exist") {
+                    if (lang == "h") {
+                        alert("कर्मचारी पहले से मौजूद है !!! यदि आप अपना पासवर्ड भूल गए हैं तो कृप्या रिसेट करो पर क्लिक करें");
+                    }
+                    else if (lang == "m") {
+                        alert("कर्मचारी आधीच अस्तित्त्वात आहेत !!! आपण आपला संकेतशब्द विसरल्यास कृपया रीसेट करा पासवर्ड वर क्लिक करा");
+                    }
+                    else if (lang == "k") {
+                        alert("ಉದ್ಯೋಗಿ ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ !!! ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ನೀವು ಮರೆತಿದ್ದರೆ ದಯವಿಟ್ಟು ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸಿ ಕ್ಲಿಕ್ ಮಾಡಿ");
+                    }
+                    else if (lang == "g") {
+                        alert("કર્મચારી પહેલેથી જ અસ્તિત્વમાં છે !!! જો તમે તમારો પાસવર્ડ ભૂલી ગયા છો, તો મહેરબાની કરીને ફરીથી સેટ કરો પાસવર્ડ પર ક્લિક કરો");
+                    }
+                    else if (lang == "b") {
+                        alert("কর্মী ইতিমধ্যে বিদ্যমান !!! আপনি যদি নিজের পাসওয়ার্ড ভুলে গিয়ে থাকেন তবে দয়া করে রিসেট পাসওয়ার্ডটিতে ক্লিক করুন");
+                    }
+                    else {
+                        alert("Employee already Exist!!! \r\n If you forgot your password please click on Reset Password");
+                    }
+                    window.location.href = '@Url.Action("LoginKIOSKHome", "Account")';
+                }
+                else if (data.msg == "InvalidMifare") {
+                    $("#txtscancard").val("");
+                    $("#txtscancard").focus();
+                    alert("Mifare Card validity is over OR Invalid Mifare Card. Please contact HR Dept");
+                    $("#loader").hide();
+                }
+                else {
+                    $("#txtscancard").val("");
+                    $("#txtscancard").focus();
+                    if (lang == "h") {
+                        alert("अमान्य कर्मचारी या ग़लती आई ..");
+                    }
+                    else if (lang == "m") {
+                        alert("अवैध कर्मचारी किंवा चूक आली .");
+                    }
+                    else if (lang == "k") {
+                        alert("ಅಮಾನ್ಯ ಉದ್ಯೋಗಿ ಐಡಿ ಅಥವಾ ದೋಷ ಸಂಭವಿಸಿದೆ ..");
+                    }
+                    else if (lang == "g") {
+                        alert("અમાન્ય માયફેર કાર્ડ અથવા ભૂલ આવી ..");
+                    }
+                    else if (lang == "b") {
+                        alert("অবৈধ কর্মচারী আইডি বা ত্রুটি ঘটেছে ..");
+                    }
+                    else {
+                        alert("Invalid Mifare Card or error occured..");
+                    }
+                    $("#loader").hide();
+                }
+            }
+            else {
+                if (lang == "h") {
+                    alert("ग़लती आई..");
+                }
+                else if (lang == "m") {
+                    alert("चूक झाली..");
+                }
+                else if (lang == "k") {
+                    alert("ದೋಷ ಸಂಭವಿಸಿದೆ..");
+                }
+                else if (lang == "g") {
+                    alert("ભૂલ આવી!..");
+                }
+                else if (lang == "b") {
+                    alert("ত্রুটি ঘটেছে..");
+                }
+                else {
+                    alert("Error occured..");
+                }
+                $("#loader").hide();
+                //alert("Error occured..");
+            }
+        });
+    }
+
+    $(document).ready(function () {        
+        $("#btnSubmit").css('display', 'none');
+        $("#lblemp").css('display', 'none');
+        $("#lblempid").css('display', 'none');
+        $("#txtscancard").focus();
+        $('#EmployeeDOB').inputmask('dd-mm-yyyy', { 'placeholder': 'dd-mm-yyyy' })
+        $('#EmployeeDOB').datepicker({
+            format: 'dd-mm-yyyy',
+            autoclose: true
+        });
+
+        $("#btnSubmit").click(function () {
+            $("#loader").show();
+            var Empid = $.trim($('#lblempid').text());
+            var url1 = '@Url.Action("ActionGetdataSAP", "Account")';
+            if (Empid != null && Empid != "") {
+                $.getJSON(url1, { Employeeid: Empid }, function (data) {
+                    var lang = localStorage.getItem("language");
+                    $("#loader").hide();
+                    if (data == "Valid") {
+                        $("#EnterDOB").modal('show');
+                    }
+                    else if (data == "NoEmployeeExist") {
+                        if (lang == "h") {
+                            alert("कृप्या मान्य कर्मचारी आयडी दर्ज करे");
+                        }
+                        else if (lang == "m") {
+                            alert("कृपया वैध कर्मचारी आयडी निवडा");
+                        }
+                        else if (lang == "k") {
+                            alert("ದಯವಿಟ್ಟು ಮಾನ್ಯ ಉದ್ಯೋಗಿ ಐಡಿ ನಮೂದಿಸಿ");
+                        }
+                        else if (lang == "g") {
+                            alert("મહેરબાની કરીને માન્ય કર્મચારી દાખલ કરો");
+                        }
+                        else if (lang == "b") {
+                            alert("অনুগ্রহ বৈধ কর্মচারী নির্বাচন করা");
+                        }
+                        else {
+                            alert("Please enter valid EmployeeID");
+                        }
+                        window.location.reload(1);
+                    }                   
+                    else {
+                        if (lang == "h") {
+                            alert("आप MYLEAVES प्रणाली का उपयोग करने के लिए अधिकृत नहीं हैं। किसी भी प्रश्न के लिए कृपया अपने एचआर विभाग से संपर्क करें!");
+                        }
+                        else if (lang == "m") {
+                            alert("आपण सिस्टम वापरण्यास अधिकृत नाही. कोणत्याही प्रश्नांसाठी कृपया आपल्या एचआर विभागाशी संपर्क साधा!");
+                        }
+                        else if (lang == "k") {
+                            alert("MYLEAVES ಸಿಸ್ಟಮ್ ಅನ್ನು ಬಳಸಲು ನಿಮಗೆ ಅಧಿಕಾರವಿಲ್ಲ. ಯಾವುದೇ ಪ್ರಶ್ನೆಗಳಿಗೆ ದಯವಿಟ್ಟು ನಿಮ್ಮ ಮಾನವ ಸಂಪನ್ಮೂಲ ಇಲಾಖೆಯನ್ನು ಸಂಪರ್ಕಿಸಿ!");
+                        }
+                        else if (lang == "g") {
+                            alert("તમે સિસ્ટમનો ઉપયોગ કરવા માટે અધિકૃત નથી. કૃપા કરીને તમારા એચઆર વિભાગનો કોઈપણ પ્રશ્નો માટે સંપર્ક કરો!");
+                        }
+                        else if (lang == "b") {
+                            alert("আপনি MYLEAVES সিস্টেম ব্যবহারের জন্য অনুমোদিত নন। দয়া করে যে কোনও প্রশ্নের জন্য আপনার এইচআর অধিদপ্তরের সাথে যোগাযোগ করুন!");
+                        }
+                        else {
+                            alert("You are not authorized to use MYLEAVES system. Kindly contact your HR dept. for any queries!");
+                        }
+                        $("#loader").hide();
+                        window.location.reload(1);
+                    }
+                });
+            }
+        });
+
+        $("#Submitbuttonotp").click(function () {
+            $("#loader").show();
+            var url1 = '@Url.Action("ValidateDOBForKIOSK", "Account")';
+            var Dob = $('#EmployeeDOB').val();
+            var Empid = $('#lblempid').text();
+            var lang = localStorage.getItem("language");
+            //alert("empid" + Empid);
+            $.getJSON(url1, { dob: Dob, empid: Empid }, function (data) {
+                if (data == true) {
+                    window.location.href = 'NewUser';
+                    $("#EnterDOB").modal("hide");
+                }
+                else {
+                    $("#EnterDOB").modal("hide");
+                    $("#loader").hide();
+                    if (lang == "h") {
+                        alert("आपने गलत जन्म तिथि दर्ज की है");
+                    }
+                    else if (lang == "m") {
+                        alert("आपण चुकीची जन्मतारीख प्रविष्ट केली आहे");
+                    }
+                    else if (lang == "k") {
+                        alert("ನೀವು ಹುಟ್ಟಿದ ದಿನಾಂಕವನ್ನು ತಪ್ಪಾಗಿ ನಮೂದಿಸಿದ್ದೀರಿ");
+                    }
+                    else if (lang == "g") {
+                        alert("તમે જન્મ તારીખ ખોટી દાખલ કરી છે");
+                    }
+                    else if (lang == "b") {
+                        alert("আপনি জন্ম তারিখ ভুল প্রবেশ করেছে");
+                    }
+                    else {
+                        alert("You have entered wrong Date Of Birth");
+                    }
+                    //alert("You have entered wrong Date Of Birth");
+                }
+            });
+        });
+        $("#loader").hide();
+    });
+    var getUrlParameter = function getUrlParameter(sParam) {
+        var sPageURL = window.location.search.substring(1),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+            }
+        }
+    };
+</script>
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-8">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title trn" data-trn-key="btnSave">Scan Mifare Card</h3>
+                </div>
+                <center>
+                    <form class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="box-body">
+                            <div class="form-group">
+                                <div class="col-sm-1">
+                                </div>
+                                <label for="language" class="col-sm-3 control-label  trn" data-trn-key="pleasescanMifareCard">Please Scan Mifare card</label>
+                                <div class="col-sm-4">
+                                    <input autocomplete="off" class="form-control" onchange="return scanmifarecard(this);" id="txtscancard" new { placeholder="Scan Mifare Card" } />                                   
+                                </div>
+                                <div class="col-sm-1">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-1">
+                                </div>
+                                <label style="display:none;" id="lblemp" for="language" class="col-sm-3 control-label  trn" data-trn-key="employeeid">Employee ID</label>
+                                <div class="col-sm-4">
+                                    <label style="display:none;" class="employeeidlbl badge  trn" data-trn-key="employeeid" asp-for="EmployeeID" id="lblempid">  </label>
+                                </div>
+                                <div class="col-sm-1">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+                        <div class="box-footer">
+                            <div class="col-lg-12 text-center">
+                                <button style="display:none;" type="button" id="btnSubmit" data-toggle="modal" class="btn btn-success btn-lg trn" data-trn-key="proceedtovalidation">   <i class="fa fa-check"></i>  Proceed to validation..</button>
+                                <a href="@Url.Action("LoginKIOSKHome", "Account")" class=" btn btn-lg btn-warning">
+                                    <i class="fa fa-arrow-left"></i> <span class="trn" data-trn-key="back"> Back</span>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- /.box-footer -->
+                    </form>
+                </center>
+            </div>
+        </div>
+        <div class="col-md-2">
+        </div>
+    </div>
+    <div class="modal fade" id="EnterDOB" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title trn" data-trn-key="enterDOB">Enter DOB</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <div class="col-sm-12">
+                            <div class="col-sm-4">
+                                <label asp-for="EmployeeDOB" autocomplete="off" class=" trn" data-trn-key="employeeDOB"></label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" asp-for="EmployeeDOB" autocomplete="off" class="form-control" data-inputmask="'alias': 'dd/mm/yyyy'" data-mask>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="Submitbuttonotp" class="btn btn-lg btn-success trn" data-trn-key="btnSave">Submit</button>
+                    <button type="button" class="btn btn-lg btn-warning trn" data-dismiss="modal" data-trn-key="btnClose">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>   
+</section>

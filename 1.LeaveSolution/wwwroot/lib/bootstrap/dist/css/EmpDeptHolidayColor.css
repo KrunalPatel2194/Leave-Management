@@ -1,0 +1,82 @@
+﻿@keyframes yellowfade {
+    50% {
+        border-color: #ff0000;
+    }
+}
+
+.item-highlight {
+    animation-name: yellowfade;
+    animation-duration: .5s;
+    animation-timing-function: step-end;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+
+/*For Working Day*/
+.ui-datepicker td.a, .ui-datepicker td.WorkingDay a:hover {
+    background: none #ffffff !important;
+    border: 1px solid #BF5A0C;
+}
+
+.ui-state-default {
+    background: none #ffffff;
+    border: 1px solid #BF5A0C;
+}
+/*For Non-Working Day*/
+.ui-datepicker td.NonWorkingDay a, .ui-datepicker td.NonWorkingDay a:hover {
+    background: none #adaaaa !important;
+    border: 1px solid #BF5A0C;
+}
+
+.ui-state-default {
+    background: none #adaaaa;
+    border: 1px solid #BF5A0C;
+}
+/*For Approved*/
+.ui-datepicker td.Approved a, .ui-datepicker td.Approved a:hover {
+    background: none #baecf1 !important;
+    border: 1px solid #BF5A0C;
+}
+
+td.Approved span.ui-state-default {
+    background: none #baecf1 !important;
+    border: 1px solid #BF5A0C;
+}
+
+.ui-state-default {
+    background: none #baecf1;
+    border: 1px solid #BF5A0C;
+}
+/*For Approval Pending*/
+.ui-datepicker td.ApprovalPending a, .ui-datepicker td.ApprovalPending a:hover {
+    background: none #cfe5e8 !important;
+    border: 1px solid #BF5A0C;
+}
+
+td.ApprovalPending span.ui-state-default {
+    background: none #cfe5e8 !important;
+    border: 1px solid #BF5A0C;
+}
+
+.ui-state-default {
+    background: none #cfe5e8;
+    border: 1px solid #BF5A0C;
+}
+/*For Public Holiday*/
+.ui-datepicker td.publicholiday a, .ui-datepicker td.publicholiday a:hover {
+    background: none #e6dc70 !important;
+    border: 1px solid #BF5A0C;
+}
+
+td.publicholiday span.ui-state-default {
+    background: none #e6dc70 !important;
+    border: 1px solid #BF5A0C;
+}
+
+.ui-state-default {
+    background: none #e6dc70;
+    border: 1px solid #BF5A0C;
+}
+
+

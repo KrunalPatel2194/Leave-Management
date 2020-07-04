@@ -1,0 +1,107 @@
+﻿@using Microsoft.AspNetCore.Http;
+@using BlueCollaredLeaveSolution.Core;
+@model BlueCollaredLeaveSolution.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Hello";
+}
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<script type="text/javascript">
+    $(document).ready(function () {
+
+    });
+</script>
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-8">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Generate Password</h3>
+                </div>
+                <form asp-action="NewUser" method="post" class="form-horizontal">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="box-body">
+                        <div class="form-group row">
+                            <div class="col-sm-3">
+                            </div>
+                            <div class="col-form-label col-sm-2">
+                                <label asp-for="NewPassword" class="trn" data-trn-key="newpassword"></label>
+                            </div>
+                            <div class="col-sm-4">
+                                <input asp-for="NewPassword" maxlength="12" class="form-control" type="password" />
+                                <span asp-validation-for="NewPassword" class="text-danger"></span>
+                            </div>
+                            <div class="col-sm-3">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-3">
+                            </div>
+                            <div class="col-form-label col-sm-2">
+                                <label asp-for="ConfirmPassword" class="trn" data-trn-key="confirmPassword"></label>
+                            </div>
+                            <div class="col-sm-4">
+                                <input asp-for="ConfirmPassword"  maxlength="12"  class="form-control" type="password" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
+                            <div class="col-sm-3">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-footer" style="text-align:center;">
+                        <button type="submit" class="btn btn-success btn-lg" id="Submitbutton">
+                            <span class="glyphicon glyphicon-floppy-disk "></span>
+                            <span data-trn-key="submit" class="trn">Submit</span>
+                        </button>
+                        @if (@Context.Session.GetString(Constant.KISOK) == "yes")
+                        {
+                            <a href="@Url.Action("LoginKioskHome", "Account")" class=" btn btn-lg btn-warning">
+                                <i class="fa fa-arrow-left"></i> <span class="trn" data-trn-key="back"> Back</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Login", "Account")" class=" btn btn-lg btn-warning">
+                                <i class="fa fa-arrow-left"></i> <span class="trn" data-trn-key="back"> Back</span>
+                            </a>
+                        }
+                    </div>
+                </form>
+                <br />
+                <div class="form-group row" style=" color:red;">
+                    <div class="col-lg-2">
+                    </div>
+                    <div class="col-lg-10">
+                        <label class="trn" data-trn-key="nweusercomment1">Password guidlines:- It should have </label>
+                        <ui style=" color:red;">
+                            <li class="col-lg-12">
+                                <label class="trn" data-trn-key="nweusercomment2">Minimum 8 - Maximum 15 characters & One number like 1,2,3 etc</label>
+                            </li>
+                            <li class="col-lg-12">
+                                <label class="trn" data-trn-key="nweusercomment3">One special character like &,*,# etc</label>
+                            </li>
+                            <li class="col-lg-12">
+                                <label class="trn" data-trn-key="nweusercomment4">One Alphabet in CAPS like A,B,C etc</label>
+                            </li>
+                            <li class="col-lg-12">
+                                <label class="trn" data-trn-key="nweusercomment5">System will not allow to keep last 3 passwords.</label>
+                            </li>
+                            <li class="col-lg-12">
+                                <label class="trn" data-trn-key="nweusercomment6">If Password expires during next login,the OTP process will have to be followed by employee again.</label>
+                            </li>
+                            <li class="col-lg-12">
+                                <label class="trn" data-trn-key="nweusercomment7">Password reset provision will be there on screen,OTP and DOB will be asked during resetting password.</label>
+                            </li>
+                        </ui>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+        </div>
+    </div>
+</section>

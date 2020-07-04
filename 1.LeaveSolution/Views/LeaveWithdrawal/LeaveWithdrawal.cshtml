@@ -1,0 +1,344 @@
+﻿@model BlueCollaredLeaveSolution.Models.LeaveWithdrawalViewModel;
+@{
+    ViewData["Title"] = "LeaveWithdrawal";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/lib/bootstrap/dist/css/LeaveAppWIth.css" rel="stylesheet" />
+<style>
+    #tableleavewithdrawl {
+        border-bottom: 1px solid #dee2e6;
+    }
+</style>
+@{
+    string year = DateTime.Now.Year.ToString();    
+}
+@section Scripts{
+    <script src="~/js/jquery.dataTables.min.js"></script>
+    <link href="~/JQTable/jquery-ui.css" rel="stylesheet" />
+    <link href="~/JQTable/dataTables.jqueryui.min.css" rel="stylesheet" />
+    <link href="~/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+}
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#tableleavewithdrawl").DataTable({
+                "processing": true, // for show progress bar
+                // "serverSide": true, // for process server side
+                "filter": true, // this is for disable filter (search box)
+            "orderMulti": false, // for disable multiple column at once
+            order: [9, 'desc'],
+            "columnDefs": [
+                { "orderable": false, "targets": [1, 2, 3, 4, 5, 6, 7, 8] },
+                {
+                    "targets": [9],
+                    "visible": false,
+                    "searchable": false
+                },
+            ],
+            });
+
+        // For Leave withdrwal popup data popup.
+        $("#btnLeaveWithdrawals").click(function () {
+            $("#WithdrawalRequest").modal('hide');
+            $("#loader").show();
+            var lang = localStorage.getItem("language");
+            var leaveid = $("#withdrawleaveid").val();
+            var status = $("#withdrawstatus").val();
+            var empid = $("#withdrawempid").val();
+            var totalleave = $("#withdrawtotalleave").val();
+            var balance = $("#withdrawbalance").val();
+            //new add
+            var fromdate = $("#withdrawfromdate").val();
+            var todate = $("#withdrawtodate").val();
+            var leaveCategory = $("#withdrawleavetype").val();
+            var leavecode = $("#withdrawleavecode").val();
+            var from = $("#withdrawlfrom").val();
+            var code = $("#withdrawllvcode").val();
+            var leaveshift = $("#withdrawlleaveshift").val();
+            var model = {
+                Status: status,
+                EmployeeID: empid,
+                LeaveRequestId: leaveid,
+                TotalLeaves: totalleave ,
+                BalanceLeave: balance,
+                FromDateString: fromdate,
+                ToDateString: todate,
+                LeaveCategory: leaveCategory,
+                LeaveCode: code,
+                LeaveAppliedFrom: from,
+                LeaveShift: leaveshift
+            };
+                var url = '@Url.Content("~/")' + "LeaveWithdrawal/LeaveWithdrawal";
+                type = 'Post';
+                data = model;
+            $.post(url, { model: model }, function (data) {
+                
+                    if (data == true)
+                    {                        
+                        if (status == "Approved")
+                        {
+                            if (lang == "h") {
+                                alert( "छुट्टी वापस लेना से पहले ही अनुमोदित है यह अनुमोदन प्रक्रिया में जाएगा।" );
+                            }
+                            else if (lang == "m") {
+                                alert("आधीपासूनच मंजूर रजा काढणे मंजुरी प्रक्रियेवर जाईल.");
+                            }
+                            else if (lang == "k") {
+                                alert( "ಹಿಂತೆಗೆದುಕೊಳ್ಳುವ ರಜೆ ಈಗಾಗಲೇ ಅನುಮೋದನೆ ಪಡೆದಿದೆ ಅದು ಅನುಮೋದನೆ ಪ್ರಕ್ರಿಯೆಗೆ ಹೋಗುತ್ತದೆ.");
+                            }
+                            else if (lang == "g") {
+                                alert( "ઉપાડ રજા પહેલાથી જ માન્ય થઈ ગઈ છે તે મંજૂરી પ્રક્રિયામાં જશે.");
+                            }
+                            else if (lang == "b") {
+                                alert( "ইতিমধ্যে অনুমোদিত ছাড় প্রত্যাহার এটি অনুমোদনের প্রক্রিয়াতে যাবে।" );
+                            }
+                            else {
+                                alert("Withdrawal leave already approved it will go to approval process.");
+                            }
+                            // alert('Withdrawal leave already approved it will go to approval process.');
+                        }
+                        else {
+                            if (lang == "h") {
+                                alert("छुट्टी सफलतापूर्वक वापस ले ली गई है ...।");
+                            }
+                            else if (lang == "m") {
+                                alert("रजा यशस्वीपणे मागे घेण्यात आली आहे ...");
+                            }
+                            else if (lang == "k") {
+                                alert("ರಜೆ ಯಶಸ್ವಿಯಾಗಿ ಹಿಂತೆಗೆದುಕೊಳ್ಳಲಾಗಿದೆ ....");
+                            }
+                            else if (lang == "g") {
+                                alert("રજા સફળતાપૂર્વક પાછી ખેંચી લેવામાં આવી છે ....");
+                            }
+                            else if (lang == "b") {
+                                alert("ছুটি সফলভাবে প্রত্যাহার করা হয়েছে ....");
+                            }
+                            else {
+                                alert("Leave has been Withdraw Successfully....");
+                            }
+                           // alert('Leave has been Withdraw Successfully.... ');
+                        }
+                        window.location.reload(1);
+                    }
+                    else {             
+                        $("#loader").hide();
+                        if (lang == "h") {
+                            alert("छुट्टी वापस लेना के दौरान ग़लती आई.");
+                        }
+                        else if (lang == "m") {
+                            alert("रजा मागे घेतान चूक झाली.");
+                        }
+                        else if (lang == "k") {
+                            alert("ವಾಪಸಾತಿ ರಜೆ ಸಮಯದಲ್ಲಿ ದೋಷ ಸಂಭವಿಸಿದೆ.");
+                        }
+                        else if (lang == "g") {
+                            alert("રજા પાછી ખેંચતી વખતે ભૂલ આવી.");
+                        }
+                        else if (lang == "b") {
+                            alert("ছুটি প্রত্যাহারের সময় ত্রুটি ঘটেছে।");
+                        }
+                        else {
+                            alert("Error occured during withdraw leave.");
+                        }
+                        //alert("Error occured during withdraw leave.")
+                    }
+                });
+        });
+
+        $(document).on("click", ".clsWithDraw", function () {
+            var Id = $(this).attr('leaveid');
+            var status = $(this).attr('status');
+            var balance = $(this).attr('balance');
+            var empid = $(this).attr('empid');
+            var totalleave = $(this).attr('totalleave');
+            //new add
+            var fromdate = $(this).attr('fromdate');
+            var todate = $(this).attr('todate');
+            var leaveCategory = $(this).attr('leaveCategory');
+            var leavecode = $(this).attr('leavecode');
+            var from = $(this).attr('from');
+            var code = $(this).attr('code');
+            var shift = $(this).attr('shift');
+
+            $("#withdrawleaveid").val(Id);
+            $("#withdrawstatus").val(status);
+            $("#withdrawbalance").val(balance);
+            $("#withdrawempid").val(empid);
+            $("#withdrawtotalleave").val(totalleave);
+            //new add
+            $("#withdrawfromdate").val(fromdate);
+            $("#withdrawtodate").val(todate);
+            $("#withdrawleavetype").val(leaveCategory);
+            $("#withdrawleavecode").val(leavecode);
+            $("#withdrawlfrom").val(from);
+            $("#withdrawllvcode").val(code);
+            $("#withdrawlleaveshift").val(shift);
+            $("#WithdrawalRequest").modal('show');
+        });
+
+        $(document).on("click", ".clsChangeReq", function () {
+
+            var Id = $(this).attr('leaveid');
+            var status = $(this).attr('status');
+            $("#changeleaveid").val(Id);
+            $("#changestatus").val(status);
+            $("#ChangeRequest").modal('show');
+        });
+
+        $("#ChangeLeaveReq").click(function () {
+            $("#ChangeRequest").modal('hide');
+            $("#loader").show();
+            var leaveid = $("#changeleaveid").val();
+            var status = $("#changestatus").val();
+            var model = {
+                Status: status,
+                LeaveRequestId: leaveid,
+            };
+                var url = '@Url.Content("~/")' + "LeaveWithdrawal/LeaveWithdrawalPassData";
+                type = 'Post';
+                data = model;
+            $.post(url, { model: model }, function (data) {                
+                window.location.href = data;
+            })
+
+        });
+    });
+</script>
+
+<section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-primary BorderBottom-blue">
+                <div class="box-header">
+                    <h3 class="box-title trn" data-trn-key="Leave Withdrawal">
+                        Leave Request Withdrawal
+                    </h3>
+                </div>
+                <input type="hidden" id="withdrawleaveid" value="" />
+                <input type="hidden" id="withdrawstatus" value="" />
+                <input type="hidden" id="withdrawbalance" value="" />
+                <input type="hidden" id="withdrawempid" value="" />
+                <input type="hidden" id="withdrawtotalleave" value="" />
+                @*new add*@
+                <input type="hidden" id="withdrawfromdate" value="" />
+                <input type="hidden" id="withdrawtodate" value="" />
+                <input type="hidden" id="withdrawleavetype" value="" />
+                <input type="hidden" id="withdrawleavecode" value="" />
+                <input type="hidden" id="withdrawlfrom" value="" />
+                <input type="hidden" id="withdrawllvcode" value="" />
+                <input type="hidden" id="withdrawlleaveshift" value="" />
+                
+
+                <input type="hidden" id="changeleaveid" value="" />
+                <input type="hidden" id="changestatus" value="" />
+                <!-- /.box-header -->
+                <div class="box-body table-responsive">
+                    <table id="tableleavewithdrawl" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th data-trn-key="leavetype" class="trn">Leave Type</th>
+                                <th data-trn-key="fromdate" class="trn">From Date</th>
+                                <th data-trn-key="todate" class="trn">To Date</th>
+                                <th data-trn-key="leaveshift" class="trn">LeaveShift</th>
+                                <th data-trn-key="Leave" class="trn">Leave</th>
+                                <th data-trn-key="status" class="trn">Status</th>
+                                <th data-trn-key="filename" class="trn">File Name</th>
+                                <th data-trn-key="withdrawal" class="trn">withdrawal</th>
+                                <th data-trn-key="actiontaken" class="trn">Action to be taken</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.leavewithdrawal.Count; i++)
+                            {
+                                <tr>
+                                    <td>@Model.leavewithdrawal[i].LeaveCategory</td>
+                                    <td>@Model.leavewithdrawal[i].FromDateString</td>
+                                    <td>@Model.leavewithdrawal[i].ToDateString</td>
+                                    <td>@Model.leavewithdrawal[i].LeaveShift </td>
+                                    <td>@Model.leavewithdrawal[i].TotalLeaves</td>
+                                    <td>@Model.leavewithdrawal[i].Status</td>
+                                    <td>
+                                        @if (@Model.leavewithdrawal[i].UploadFileName != null && @Model.leavewithdrawal[i].UploadFileName != "")
+                                        {
+                                            <a href="@Url.Action("DownloadAttachment", "LeaveWithdrawal", new { filename = Model.leavewithdrawal[i].UploadFileName })">@Model.leavewithdrawal[i].UploadFileName.Split('_')[1]</a>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (Model.leavewithdrawal[i].FromDateString.Contains(year) == true && (Model.leavewithdrawal[i].LeaveAppliedFrom == "EMP" || Model.leavewithdrawal[i].LeaveCode == "L0" || Model.leavewithdrawal[i].LeaveCode == "P0" || Model.leavewithdrawal[i].LeaveCode == "P0F" || Model.leavewithdrawal[i].LeaveCode == "M0"))
+                                        {
+                                            <button style="padding:1px" id="Withdrawalmodal" class="clsWithDraw btn btn-success trn" data-trn-key="withdrawal" shift="@Model.leavewithdrawal[i].LeaveShift" empid="@Model.leavewithdrawal[i].EmployeeID" code="@Model.leavewithdrawal[i].LeaveCode" from="@Model.leavewithdrawal[i].LeaveAppliedFrom" balance="@Model.leavewithdrawal[i].BalanceLeave" totalleave="@Model.leavewithdrawal[i].TotalLeaves" fromdate="@Model.leavewithdrawal[i].FromDateString" todate="@Model.leavewithdrawal[i].ToDateString" leaveCategory="@Model.leavewithdrawal[i].LeaveCategory" leaveid="@Model.leavewithdrawal[i].LeaveRequestId" status="@Model.leavewithdrawal[i].Status" type="button">Withdrawal</button>
+                                        }
+                                        else
+                                        {
+                                            <button style="padding:1px" id="" class=" btn btn-success trn" data-trn-key="withdrawal" disabled type="button">Withdrawal</button>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (Model.leavewithdrawal[i].Status == "Pending" && Model.leavewithdrawal[i].FromDateString.Contains(year) == true)
+                                        {
+                                            <button style="padding:1px" id="ChangeReq" class="clsChangeReq btn btn-primary  trn" data-trn-key="change" leaveid="@Model.leavewithdrawal[i].LeaveRequestId" status="@Model.leavewithdrawal[i].Status" type="button">Change</button>
+                                        }
+                                        else
+                                        {
+                                            <button style="padding:1px" id="" class=" btn btn-primary trn" data-trn-key="change" disabled type="button">Change</button>
+                                        }
+                                    </td>
+                                    <td>
+                                        @Model.leavewithdrawal[i].LeaveAppliedDateString
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.box-body -->
+            </div>
+
+            <!-- /.box -->
+        </div>
+    </div>
+    <div class="modal fade" id="WithdrawalRequest">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title trn" data-trn-key="withdrawpopupHeader" id="">Withdraw Leave Request</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="col-lg-12">
+                            <label class="trn" data-trn-key="withdrawpopup">Do you want to withdrawal selected leave request?</label>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success trn" data-trn-key="withdrawal" id="btnLeaveWithdrawals">Withdraw</button>
+                        <button type="button" class="btn btn-default  trn" data-trn-key="cancelbutton" data-dismiss="modal" data-toggle="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="ChangeRequest">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title trn" data-trn-key="changepopupheader" id="">Change Leave Request</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="col-lg-12">
+                            <label class="trn" data-trn-key="changepopup">Are you sure to change Approver of leave request?</label>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="modal-footer">
+
+                        <button type="submit" class="btn btn-primary trn" data-trn-key="change" id="ChangeLeaveReq">Change</button>
+                        <button type="button" class="btn btn-default  trn" data-trn-key="cancelbutton" data-dismiss="modal" data-toggle="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

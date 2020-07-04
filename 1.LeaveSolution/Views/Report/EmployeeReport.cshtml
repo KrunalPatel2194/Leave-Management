@@ -1,0 +1,170 @@
+﻿@model BlueCollaredLeaveSolution.Models.LeaveHistoryModelViewModel
+@{
+    ViewData["Title"] = "EmployeeReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Scripts{
+    <meta charset="utf-8">
+    <link href="~/Calander/jquery-ui.css" rel="stylesheet" />
+    <link href="~/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Calander/jquery-ui.js"></script>
+    @*For Time picker*@
+    <script src="~/Datepicker/moment.js"></script>
+    <script src="~/js/jquery.dataTables.min.js"></script>
+    <link href="~/JQTable/dataTables.jqueryui.min.css" rel="stylesheet" />
+    <script src="~/JQTable/jquery.dataTables.min.js"></script>
+    <script src="~/js/jquery.unobtrusive-ajax.min.js"></script>
+}
+<script>
+    $(document).ready(function () {
+        $("#loader").show();
+        $("#FromDate").datepicker({
+            dateFormat: 'dd/mm/yy',
+            onSelect: function (selectedDate) {//when click on calander then select date
+                frmDate = selectedDate;
+                $(".datepicker").datepicker({ maxDate: '0' });
+                if (tDate < selectedDate) {
+                    $("#FromDate").val("");
+                }
+            }
+        });
+
+        $("#ToDate").datepicker({
+            dateFormat: 'dd/mm/yy',
+            onSelect: function (selectedDate) {//when click on calander then select date
+                tDate = selectedDate;
+                var ffdate = new Date(frmDate.split('/')[2] + "-" + frmDate.split('/')[1] + "-" + frmDate.split('/')[0]);
+                var ttdate = new Date(tDate.split('/')[2] + "-" + tDate.split('/')[1] + "-" + tDate.split('/')[0]);
+                if (ffdate <= ttdate) {
+                    tDate = selectedDate;
+                }
+                else {
+                    $("#ToDate").val("");
+                }
+            }
+        });
+        $("#myTable").DataTable({
+            "processing": true, // for show progress bar
+            // "serverSide": true, // for process server side
+            "filter": true, // this is for disable filter (search box)
+            "orderMulti": false, // for disable multiple column at once
+            "scrollCollapse": true,
+            "order": [[1, "desc"]]
+            //"scrollY": 350,
+        });
+        $("#loader").hide();
+    });
+</script>
+<style>
+    #myTable {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    strong.Approved, strong.Withdrawal {
+        color: green;
+    }
+
+    strong.Rejected {
+        color: red
+    }
+
+    strong.Pending {
+        color: darkgoldenrod;
+    }
+</style>
+<form asp-controller="Report" asp-action="EmployeeReport" data-ajax-method="POST">
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary BorderBottom-blue">
+                    <div class="box-header">
+                        <h3 class="box-title trn" data-trn-key="">
+                            Employee Report
+                        </h3>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-3">
+                        </div>
+                        <div class="col-lg-2">
+                            <label data-trn-key="fromdate" class="trn">From Date</label>
+                            <input type="text" id="FromDate" class="form-control" asp-for="@Model.FromDate" readonly="readonly" autocomplete="off" new { placeholder="DD/MM/YYYY" } />
+                        </div>
+                        <div class="col-lg-2">
+                            <label data-trn-key="todate" class="trn">To Date</label>
+                            <input type="text" id="ToDate" class="form-control" asp-for="@Model.ToDate" readonly="readonly" autocomplete="off" new { placeholder="DD/MM/YYYY" } />
+                        </div>
+                        <div class="col-lg-2">
+                            <label data-trn-key="" class="trn">Employee ID</label>
+                            <input type="text" id="txtEmpId" class="form-control" autocomplete="off" asp-for="@Model.EmployeeID" new {placeholder="EmployeeId" } />
+                        </div>
+                        <div class="col-lg-1">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn form-control btn-success trn" data-trn-key="btnSearch" id="Submit"><i class="fa fa-search" aria-hidden="true"></i>Search</button>
+
+                        </div>
+                        <div class="col-lg-2">
+                        </div>
+                    </div>
+                    <div class="box-body table-responsive col-xs-12">
+                        <table id="myTable" class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th data-trn-key="leavecategory" class="trn">Leave Category</th>
+                                    <th data-trn-key="leaveapplieddate" class="trn">Leave Applied Date</th>
+                                    <th data-trn-key="fromdate" class="trn">From Date</th>
+                                    <th data-trn-key="todate" class="trn">To Date</th>
+                                    <th data-trn-key="leavetype" class="trn">Leave Type</th>
+                                    <th data-trn-key="totalappliedleaves" class="trn">Total Applied Leaves</th>
+                                    <th data-trn-key="approver" class="trn">Approver</th>
+                                    <th data-trn-key="status" class="trn">Status</th>
+                                    <th data-trn-key="sapstatus" class="trn">SAP Status</th>
+                                    <th data-trn-key="saperrormessg" class="trn">SAP Error Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null)
+                                {
+                                    @foreach (var items in Model.LeaveHistory)
+                                    {
+                                        <tr>
+                                            <td>@items.LeaveCategory</td>
+                                            <td>@items.LeaveAppliedDate</td>
+                                            <td>@items.FromDate</td>
+                                            <td>@items.ToDate</td>
+                                            @if (items.LeaveType == "F")
+                                            {
+                                                <td>First Half</td>
+                                            }
+                                            else if (items.LeaveType == "S")
+                                            {
+                                                <td>Second Half</td>
+                                            }
+                                            else
+                                            {
+                                                <td>Full Day</td>
+                                            }
+                                            <td>@items.TotalLeaves</td>
+                                            <td>@items.ApproverName</td>
+                                            <td><strong class="@items.Status">@items.Status</strong></td>
+                                            @if (items.Indicator == "E")
+                                            {
+                                                <td style="color: red"> Error </td>
+                                            }
+                                            else
+                                            {
+                                                <td style="color:darkgreen"> Success </td>
+                                            }
+                                            <td>@items.ErrorMsg</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</form>
+

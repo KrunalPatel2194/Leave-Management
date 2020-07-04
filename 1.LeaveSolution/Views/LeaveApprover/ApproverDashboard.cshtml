@@ -1,0 +1,147 @@
+﻿@model BlueCollaredLeaveSolution.Models.LeaveApprovalModelViewModel
+@using NonFactors.Mvc.Grid;
+
+@{
+    ViewData["Title"] = "ApproverDashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Scripts{
+    <script src="~/JQTable/jquery.dataTables.min.js"></script>
+    <link href="~/JQTable/jquery-ui.css" rel="stylesheet" />
+    <link href="~/JQTable/dataTables.jqueryui.min.css" rel="stylesheet" />
+    <link href="~/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+}
+<script>
+    $(document).ready(function () {
+        $("#loader").show();
+        $("#myTable").DataTable({
+            "processing": true, // for show progress bar
+            // "serverSide": true, // for process server side
+            "filter": true, // this is for disable filter (search box)
+            "orderMulti": false, // for disable multiple column at once
+            "scrollCollapse": true,
+            "order": [[2, "desc"]]
+            // "scrollY": 350,
+        });
+
+        $("#myTable2").DataTable({
+            "processing": true, // for show progress bar
+            // "serverSide": true, // for process server side
+            "filter": true, // this is for disable filter (search box)
+            "orderMulti": false, // for disable multiple column at once
+            "scrollCollapse": true,
+            "order": [[2, "desc"]]
+            // "scrollY": 350,
+        });
+        $("#loader").hide();
+    });
+</script>
+<style>
+    #myTable {
+        border-bottom: 1px solid #dee2e6
+    }
+
+    #myTable2 {
+        border-bottom: 1px solid #dee2e6
+    }
+</style>
+
+<section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-primary BorderBottom-blue">
+                <div class="box-header">
+                    <h3 class="box-title" data-trn-key="approverDashboard">
+                        Approver Dashboard
+                    </h3>
+                </div>
+                <div class="box-body table-responsive">
+
+                    <div class="form-group">
+                        <h4 class="box-title">
+                            Leaves Pending for Approval
+                        </h4>
+                    </div>
+                    <table id="myTable" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th data-trn-key="employeename" class="">Employee Name</th>
+                                <th data-trn-key="leavecategory" class="">Leave Category</th>
+                                <th data-trn-key="applieddate" class="">Applied Date</th>
+                                <th data-trn-key="totalleaves" class="">Total Leaves</th>
+                                <th data-trn-key="status" class="">Status</th>
+                               
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var items in Model.leavePendings)
+                            {
+                            <tr>
+                                <td>@items.EmployeeName</td>
+                                <td>@items.LeaveCategory</td>
+                                <td>@items.LeaveAppliedDateString</td>
+                                <td>@items.TotalLeaves</td>
+                                <td>@items.Status</td>
+                              
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="box box-success">
+                <div class="with-border">
+                </div>
+                <div class="box-body table-responsive">
+                    <div class="form-group">
+                        <h4 class="box-title " data-trn-key="approvedLeaves">
+                            Approved Leaves
+                        </h4>
+                    </div>
+                    <table id="myTable2" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th data-trn-key="employeename" class="">Employee Name</th>
+                                <th data-trn-key="leavecategory" class="">Leave Category</th>
+                                <th data-trn-key="applieddate" class="">Applied Date </th>
+                                <th data-trn-key="totalleaves" class="">Total Leaves</th>
+                                <th data-trn-key="status" class="">Status</th>
+                                <th data-trn-key="approveddate" class="">Approved Date</th>
+                                <th data-trn-key="sapstatus" class="">SAP Status</th>
+                                <th data-trn-key="errormessage" class="">SAP Message</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var items in Model.leaveApprovedforview)
+                            {
+                            <tr>
+                                <td>@items.EmployeeName</td>
+                                <td>@items.LeaveCategory</td>
+                                <td>@items.LeaveAppliedDateString</td>
+                                <td>@items.TotalLeaves</td>
+                                <td>@items.Status</td>
+                                <td>@items.ApprovedDate</td>
+                                @if (items.Indicator == "E")
+                                {
+                                    <td style="color: red"> Error </td>
+                                }
+                                else if (items.Indicator == "S")
+                                {
+                                    <td style="color:darkgreen"> Success </td>
+                                }
+                                else
+                                {
+                                    <td>  </td>
+                                }
+
+                                <td>@items.ErrorMsg</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
